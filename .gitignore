@@ -3,7 +3,6 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
 
 # Build outputs
 dist/
@@ -140,10 +139,9 @@ Thumbs.db
 *.swo
 *~
 
-# Test files
-test_feeds/
-*.test.js
-*.spec.js
+# Test files (keeping test_feeds/ as it might contain important test data)
+# *.test.js
+# *.spec.js
 
 # Backup files
 *.bak
@@ -151,8 +149,8 @@ test_feeds/
 *.old
 
 # Configuration files that might contain sensitive data
-config.json
-settings.json
+# config.json
+# settings.json
 secrets.json
 
 # Electron Builder
