@@ -6,7 +6,7 @@
 
 A powerful desktop application that helps security professionals automatically collect, organize, and manage threat intelligence data from multiple sources. Think of it as a smart assistant that continuously monitors the internet for potential security threats and keeps everything organized for you.
 
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue.svg)](https://github.com/your-repo/threat-intel-manager)
+[![Platform](https://img.shields.io/badge/platform-Windows-blue.svg)](https://github.com/your-repo/threat-intel-manager)
 [![Version](https://img.shields.io/badge/version-1.0.0-orange.svg)](https://github.com/your-repo/threat-intel-manager/releases)
 
 </div>
@@ -34,31 +34,31 @@ This application solves all these challenges by providing a centralized, automat
 
 ## Key Features
 
-### 🔄 **Automated Data Collection**
+### **Automated Data Collection**
 - Automatically downloads threat intelligence from multiple sources
 - Runs on a schedule you set (default: daily at 4:00 AM)
 - Handles different data formats (JSON, CSV, XML, text)
 - Retries failed downloads automatically
 
-### 🛡️ **Security & Privacy**
+### **Security & Privacy**
 - Encrypts sensitive API keys to keep them safe
 - Optional master password protection
 - All data stored locally on your computer
 - No data sent to external servers
 
-### 📊 **Smart Organization**
+### **Smart Organization**
 - Automatically categorizes threats by type (IPs, domains, URLs, etc.)
 - Advanced filtering and search capabilities
 - Tagging system for custom organization
 - Threat level scoring and analysis
 
-### 📈 **Comprehensive Monitoring**
+### **Comprehensive Monitoring**
 - Detailed logs of all activities
 - Download status tracking
 - Error reporting and troubleshooting
 - Export capabilities for reporting
 
-### 🎨 **User-Friendly Interface**
+### **User-Friendly Interface**
 - Modern, dark-themed interface
 - Intuitive navigation
 - Real-time statistics and updates
@@ -66,7 +66,7 @@ This application solves all these challenges by providing a centralized, automat
 
 ## Application Pages
 
-### 🏠 **Feeds Page** - Managing Your Data Sources
+### **Feeds Page** - Managing Your Data Sources
 
 ![Feeds Page](assets/feeds-page.png)
 
@@ -103,7 +103,7 @@ The Feeds page is your command center for managing where the application gets it
 - **XML**: Structured data format
 - **Text**: Simple text-based feeds
 
-### ⬇️ **Downloads Page** - Monitoring Data Collection
+### **Downloads Page** - Monitoring Data Collection
 
 ![Downloads Page](assets/downloads-page.png)
 
@@ -144,7 +144,7 @@ The Downloads page gives you complete visibility into how your threat intelligen
 - View network connection issues
 - Check API key problems
 
-### 🎯 **IOCs Page** - Exploring Your Threat Data
+### **IOCs Page** - Exploring Your Threat Data
 
 ![IOCs Page](assets/iocs-page.png)
 
@@ -193,7 +193,7 @@ Each threat indicator shows:
 - Bulk operations on selected threats
 - Quick actions for common tasks
 
-### 📋 **Logs Page** - System Activity Monitoring
+### **Logs Page** - System Activity Monitoring
 
 ![Logs Page](assets/logs-page.png)
 
@@ -242,7 +242,7 @@ Each log entry shows:
 - **Context Information**: Each log includes relevant system information
 - **Session Tracking**: Follow user sessions to understand workflow issues
 
-### ⚙️ **Settings Page** - Application Configuration
+### **Settings Page** - Application Configuration
 
 ![Settings Page](assets/settings-page.png)
 
@@ -299,10 +299,8 @@ The Settings page allows you to customize how the application works, manage secu
 ### Installation
 
 1. **Download the Application**
-   - Download the latest version for your operating system
+   - Download the latest version for Windows
    - Windows: `.exe` installer
-   - macOS: `.dmg` file
-   - Linux: `.AppImage` file
 
 2. **Install and Launch**
    - Run the installer and follow the setup wizard
@@ -388,7 +386,7 @@ The Settings page allows you to customize how the application works, manage secu
 - Export logs for technical support
 
 **System Requirements**
-- **Operating System**: Windows 10+, macOS 10.14+, or Linux
+- **Operating System**: Windows 10 or later
 - **Memory**: 4GB RAM minimum, 8GB recommended
 - **Storage**: 1GB free space for application and data
 - **Network**: Internet connection for downloading threat feeds
