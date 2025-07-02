@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .icon-container {
+            width: 512px;
+            height: 512px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 2px solid #374151;
+        }
+        
+        .icon-main {
+            font-size: 200px;
+            color: #10b981;
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+            position: relative;
+        }
+        
+        .icon-secondary {
+            position: absolute;
+            font-size: 60px;
+            color: #6b7280;
+            bottom: 80px;
+            right: 80px;
+            opacity: 0.7;
+        }
+        
+        .download-arrow {
+            position: absolute;
+            top: 120px;
+            right: 120px;
+            font-size: 40px;
+            color: #10b981;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        .download-button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .download-button:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="icon-container" id="iconContainer">
+            <i class="fas fa-shield-alt icon-main"></i>
+            <i class="fas fa-download download-arrow"></i>
+            <i class="fas fa-database icon-secondary"></i>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="download-button" onclick="downloadIcon()">Download Icon</button>
+        </div>
+    </div>
+
+    <script>
+        function downloadIcon() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 512;
+            canvas.height = 512;
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+            gradient.addColorStop(0, '#1e293b');
+            gradient.addColorStop(1, '#0f172a');
+            
+            // Draw background
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 512);
+            
+            // Draw border
+            ctx.strokeStyle = '#374151';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(2, 2, 508, 508);
+            
+            // Convert to data URL and download
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'icon.png';
+            link.href = dataURL;
+            link.click();
+        }
+    </script>
+</body>
+</html> 

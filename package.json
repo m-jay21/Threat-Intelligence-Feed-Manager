@@ -1,0 +1,72 @@
+{
+  "name": "threat-intel-manager",
+  "version": "1.0.0",
+  "description": "Threat Intelligence Feed Manager - Desktop Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "dist": "electron-builder --publish=never",
+    "diagnose": "node fix-database.js",
+    "rebuild": "npm rebuild better-sqlite3",
+    "fix-db": "npm rebuild better-sqlite3 && npm run diagnose"
+  },
+  "keywords": [
+    "threat-intelligence",
+    "ioc",
+    "security",
+    "electron",
+    "desktop"
+  ],
+  "author": "ACE Industries",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.6.4",
+    "electron-reload": "^2.0.0-alpha.1"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3",
+    "canvas": "^3.1.2",
+    "crypto-js": "^4.2.0",
+    "electron-store": "^8.1.0",
+    "uuid": "^9.0.1"
+  },
+  "build": {
+    "appId": "com.threatintel.manager",
+    "productName": "Threat Intel Manager",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*",
+      "!*.md",
+      "!generate_icon.js",
+      "!generate_icon.html",
+      "!create_icon.html"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**"
+    ],
+    "mac": {
+      "category": "public.app-category.security"
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": "nsis"
+    },
+    "nsis": {
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "uninstallDisplayName": "Threat Intel Manager",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

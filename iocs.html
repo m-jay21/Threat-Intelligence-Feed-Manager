@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOCs - Threat Intelligence Feed Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .custom-type-option {
+            border: 2px solid transparent;
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .custom-type-option:hover, .custom-type-option:focus {
+            border-color: #4ade80 !important; /* Tailwind green-400 */
+            background-color: #1f2937 !important; /* bg-gray-800 */
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="hidden md:flex md:flex-shrink-0">
+            <div class="flex flex-col w-64 bg-gray-900 border-r border-gray-800">
+                <div class="flex items-center h-16 px-4 border-b border-gray-800">
+                    <div class="flex items-center">
+                        <i data-lucide="shield" class="w-6 h-6 text-green-500"></i>
+                        <span class="ml-2 text-lg font-semibold">Threat Intel</span>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-grow overflow-y-auto">
+                    <nav class="flex-1 px-2 py-4 space-y-1">
+                        <a href="index.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="rss" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Feeds</span>
+                        </a>
+                        <a href="downloads.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="download" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Downloads</span>
+                        </a>
+                        <a href="iocs.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item active">
+                            <i data-lucide="list" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>IOCs</span>
+                        </a>
+                        <a href="logs.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="file-text" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Logs</span>
+                        </a>
+                        <a href="settings.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="settings" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Settings</span>
+                        </a>
+                    </nav>
+                </div>
+                <div class="p-4 border-t border-gray-800">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i data-lucide="circle-user" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-white">Admin User</p>
+                            <p class="text-xs font-medium text-gray-400">Security Analyst</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Top navigation -->
+            <div class="flex items-center justify-between h-16 px-4 border-b border-gray-800 bg-gray-900">
+                <div class="flex items-center md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 text-gray-400 rounded-md hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-lg font-semibold">IOCs</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none" onclick="exportIOCs()">
+                        <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                        Export
+                    </button>
+                    <button class="p-1 text-gray-400 rounded-full hover:text-white hover:bg-gray-700 focus:outline-none" onclick="refreshIOCs()">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main content area -->
+            <div class="flex-1 overflow-auto p-4 bg-gray-900">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="globe" class="w-8 h-8 text-blue-500"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-400">Total IOCs</p>
+                                <p class="text-2xl font-semibold text-white" id="totalIOCs">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="map-pin" class="w-8 h-8 text-red-500"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-400">IP Addresses</p>
+                                <p class="text-2xl font-semibold text-white" id="ipCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="link" class="w-8 h-8 text-yellow-500"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-400">Domains</p>
+                                <p class="text-2xl font-semibold text-white" id="domainCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="hash" class="w-8 h-8 text-purple-500"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-400">Hashes</p>
+                                <p class="text-2xl font-semibold text-white" id="hashCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IOCs Table -->
+                <div class="bg-gray-800 rounded-lg shadow overflow-hidden">
+                    <!-- Advanced Filters Section -->
+                    <div class="px-4 py-4 border-b border-gray-700 bg-gray-750">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-md font-medium text-white">Advanced Filters</h3>
+                            <button onclick="clearAllFilters()" class="text-sm text-gray-400 hover:text-white">
+                                Clear all filters
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- IOC Type Filter (Custom Dropdown) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">IOC Type</label>
+                                <div class="relative" id="customTypeDropdown">
+                                    <button type="button" id="typeDropdownButton" class="w-full flex justify-between items-center border border-gray-600 rounded-md bg-gray-700 text-white px-3 py-2 text-sm leading-normal focus:outline-none focus:ring-2 focus:ring-green-500" onclick="toggleTypeDropdown()">
+                                        <span id="typeDropdownSelected">All Types</span>
+                                        <svg class="w-3.5 h-3.5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                    </button>
+                                    <div id="typeDropdownOptions" class="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-lg hidden">
+                                        <div class="py-1">
+                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="">All Types</div>
+                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="ip">IP Addresses</div>
+                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="domain">Domains</div>
+                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="url">URLs</div>
+                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="hash">Hashes</div>
+                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="email">Emails</div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="typeFilter" value="">
+                                </div>
+                            </div>
+                            
+                            <!-- Threat Level Filter (Custom Dropdown) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Threat Level</label>
+                                <div class="relative" id="customThreatDropdown">
+                                    <button type="button" id="threatDropdownButton" class="w-full flex justify-between items-center border border-gray-600 rounded-md bg-gray-700 text-white px-3 py-2 text-sm leading-normal focus:outline-none focus:ring-2 focus:ring-green-500" onclick="toggleThreatDropdown()">
+                                        <span id="threatDropdownSelected">All Levels</span>
+                                        <svg class="w-3.5 h-3.5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                    </button>
+                                    <div id="threatDropdownOptions" class="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-lg hidden">
+                                        <div class="py-1">
+                                            <div class="custom-dropdown-option" data-value="">All Levels</div>
+                                            <div class="custom-dropdown-option" data-value="high">High</div>
+                                            <div class="custom-dropdown-option" data-value="medium">Medium</div>
+                                            <div class="custom-dropdown-option" data-value="low">Low</div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="threatLevelFilter" value="">
+                                </div>
+                            </div>
+                            
+                            <!-- Source Feed Filter (Custom Dropdown) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Source Feed</label>
+                                <div class="relative" id="customFeedDropdown">
+                                    <button type="button" id="feedDropdownButton" class="w-full flex justify-between items-center border border-gray-600 rounded-md bg-gray-700 text-white px-3 py-2 text-sm leading-normal focus:outline-none focus:ring-2 focus:ring-green-500" onclick="toggleFeedDropdown()">
+                                        <span id="feedDropdownSelected">All Feeds</span>
+                                        <svg class="w-3.5 h-3.5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                    </button>
+                                    <div id="feedDropdownOptions" class="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-lg hidden">
+                                        <div class="py-1" id="feedDropdownOptionsList">
+                                            <div class="custom-dropdown-option" data-value="">All Feeds</div>
+                                            <!-- Feed options will be populated dynamically -->
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="sourceFeedFilter" value="">
+                                </div>
+                            </div>
+                            
+                            <!-- Date Range Filter (Custom Dropdown) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Date Added</label>
+                                <div class="relative" id="customDateDropdown">
+                                    <button type="button" id="dateDropdownButton" class="w-full flex justify-between items-center border border-gray-600 rounded-md bg-gray-700 text-white px-3 py-2 text-sm leading-normal focus:outline-none focus:ring-2 focus:ring-green-500" onclick="toggleDateDropdown()">
+                                        <span id="dateDropdownSelected">All Time</span>
+                                        <svg class="w-3.5 h-3.5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                    </button>
+                                    <div id="dateDropdownOptions" class="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-lg hidden">
+                                        <div class="py-1">
+                                            <div class="custom-dropdown-option" data-value="">All Time</div>
+                                            <div class="custom-dropdown-option" data-value="today">Today</div>
+                                            <div class="custom-dropdown-option" data-value="yesterday">Yesterday</div>
+                                            <div class="custom-dropdown-option" data-value="week">Last 7 Days</div>
+                                            <div class="custom-dropdown-option" data-value="month">Last 30 Days</div>
+                                            <div class="custom-dropdown-option" data-value="quarter">Last 90 Days</div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="dateFilter" value="">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Filters Row -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <!-- Search Input -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Search IOCs</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i data-lucide="search" class="text-gray-400"></i>
+                                    </div>
+                                    <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm" placeholder="Search IOC values, descriptions..." onkeyup="applyFilters()">
+                                </div>
+                            </div>
+                            
+                            <!-- Confidence Filter (Custom Dropdown) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Min Confidence</label>
+                                <div class="relative" id="customConfidenceDropdown">
+                                    <button type="button" id="confidenceDropdownButton" class="w-full flex justify-between items-center border border-gray-600 rounded-md bg-gray-700 text-white px-3 py-2 text-sm leading-normal focus:outline-none focus:ring-2 focus:ring-green-500" onclick="toggleConfidenceDropdown()">
+                                        <span id="confidenceDropdownSelected">Any Confidence</span>
+                                        <svg class="w-3.5 h-3.5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                    </button>
+                                    <div id="confidenceDropdownOptions" class="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-lg hidden">
+                                        <div class="py-1">
+                                            <div class="custom-dropdown-option" data-value="">Any Confidence</div>
+                                            <div class="custom-dropdown-option" data-value="90">90%+</div>
+                                            <div class="custom-dropdown-option" data-value="80">80%+</div>
+                                            <div class="custom-dropdown-option" data-value="70">70%+</div>
+                                            <div class="custom-dropdown-option" data-value="60">60%+</div>
+                                            <div class="custom-dropdown-option" data-value="50">50%+</div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="confidenceFilter" value="">
+                                </div>
+                            </div>
+                            
+                            <!-- Page Size (Custom Dropdown) -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Page Size</label>
+                                <div class="relative" id="customPageSizeDropdown">
+                                    <button type="button" id="pageSizeDropdownButton" class="w-full flex justify-between items-center border border-gray-600 rounded-md bg-gray-700 text-white px-3 py-2 text-sm leading-normal focus:outline-none focus:ring-2 focus:ring-green-500" onclick="togglePageSizeDropdown()">
+                                        <span id="pageSizeDropdownSelected">25 per page</span>
+                                        <svg class="w-3.5 h-3.5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                                    </button>
+                                    <div id="pageSizeDropdownOptions" class="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-lg hidden">
+                                        <div class="py-1">
+                                            <div class="custom-dropdown-option" data-value="25">25 per page</div>
+                                            <div class="custom-dropdown-option" data-value="50">50 per page</div>
+                                            <div class="custom-dropdown-option" data-value="100">100 per page</div>
+                                            <div class="custom-dropdown-option" data-value="0">Show all</div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="pageSizeSelector" value="25">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Active Filters Display -->
+                        <div id="activeFilters" class="mt-4 flex flex-wrap gap-2">
+                            <!-- Active filter tags will be displayed here -->
+                        </div>
+                    </div>
+                    
+                    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-700">
+                        <div>
+                            <h2 class="text-lg font-medium">Indicators of Compromise</h2>
+                            <p class="text-sm text-gray-400">Extracted threat indicators from your feeds</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none" onclick="exportIOCs()">
+                                <i data-lucide="download" class="w-4 h-4 mr-1"></i>
+                                Export
+                            </button>
+                            <button class="p-1 text-gray-400 rounded-full hover:text-white hover:bg-gray-700 focus:outline-none" onclick="refreshIOCs()">
+                                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-700">
+                            <thead class="bg-gray-750">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Indicator</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Type</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Source Feed</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Threat Level</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">First Seen</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Last Updated</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-gray-800 divide-y divide-gray-700" id="iocsTableBody">
+                                <!-- IOCs will be loaded dynamically from database -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="px-4 py-3 flex items-center justify-between border-t border-gray-700">
+                        <div class="flex-1 flex justify-between sm:hidden">
+                            <button onclick="changePage(currentPage - 1)" class="relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700" id="mobilePrevBtn">Previous</button>
+                            <button onclick="changePage(currentPage + 1)" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-gray-300 bg-gray-800 hover:bg-gray-700" id="mobileNextBtn">Next</button>
+                        </div>
+                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm text-gray-400" id="paginationInfo">
+                                    <!-- Pagination info will be updated dynamically -->
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination" id="paginationNav">
+                                    <!-- Pagination buttons will be generated dynamically -->
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IOC Details Modal -->
+    <div class="fixed z-10 inset-0 overflow-y-auto hidden" id="iocDetailsModal">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity modal-overlay" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-900 sm:mx-0 sm:h-10 sm:w-10">
+                            <i data-lucide="info" class="h-6 w-6 text-blue-500"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-white" id="modal-title">IOC Details</h3>
+                            <div class="mt-4 space-y-4" id="iocDetailsContent">
+                                <!-- IOC details will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-750 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-700 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="document.getElementById('iocDetailsModal').classList.add('hidden')">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Global variables
+        let iocs = [];
+        let filteredIOCs = [];
+        let currentPage = 1;
+        let itemsPerPage = 25; // Default page size
+        let availableFeeds = []; // Store available feeds for filter dropdown
+        
+        // Load IOCs from database
+        async function loadIOCs() {
+            try {
+                if (window.electronAPI) {
+                    iocs = await window.electronAPI.getIOCs();
+                } else {
+                    console.log('Running in browser mode - using mock IOCs data');
+                    iocs = generateMockIOCs();
+                }
+                filteredIOCs = [...iocs];
+                
+                // Extract unique feeds for filter dropdown
+                availableFeeds = [...new Set(iocs.map(ioc => ioc.sourceFeed).filter(Boolean))];
+                populateFeedFilter();
+                
+                updateStats();
+                renderIOCsTable();
+            } catch (error) {
+                console.error('Error loading IOCs:', error);
+                showNotification('Error loading IOCs', 'error');
+            }
+        }
+        
+        // Populate source feed filter dropdown (custom dropdown)
+        function populateFeedFilter() {
+            const feedDropdownOptionsList = document.getElementById('feedDropdownOptionsList');
+            if (!feedDropdownOptionsList) return;
+            feedDropdownOptionsList.innerHTML = '<div class="custom-dropdown-option" data-value="">All Feeds</div>';
+            availableFeeds.forEach(feed => {
+                const option = document.createElement('div');
+                option.className = 'custom-dropdown-option';
+                option.setAttribute('data-value', feed);
+                option.textContent = feed;
+                feedDropdownOptionsList.appendChild(option);
+            });
+            // Re-attach click listeners for new options
+            feedDropdownOptionsList.querySelectorAll('.custom-dropdown-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    document.getElementById('sourceFeedFilter').value = value;
+                    document.getElementById('feedDropdownSelected').textContent = this.textContent;
+                    document.getElementById('feedDropdownOptions').classList.add('hidden');
+                    applyFilters();
+                });
+            });
+        }
+        
+        // Generate mock IOCs for browser testing
+        function generateMockIOCs() {
+            const mockIOCs = [];
+            const types = ['ip', 'domain', 'url', 'hash', 'email'];
+            const feeds = ['AlienVault OTX', 'Abuse.ch', 'VirusTotal', 'Custom Feed'];
+            const threatLevels = ['high', 'medium', 'low'];
+            
+            for (let i = 1; i <= 25; i++) {
+                const type = types[Math.floor(Math.random() * types.length)];
+                let value = '';
+                
+                switch (type) {
+                    case 'ip':
+                        value = `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+                        break;
+                    case 'domain':
+                        value = `malicious${i}.example.com`;
+                        break;
+                    case 'url':
+                        value = `https://malicious${i}.example.com/payload.exe`;
+                        break;
+                    case 'hash':
+                        value = 'a'.repeat(32) + i.toString().padStart(8, '0');
+                        break;
+                    case 'email':
+                        value = `malicious${i}@example.com`;
+                        break;
+                }
+                
+                mockIOCs.push({
+                    id: `ioc-${i}`,
+                    value: value,
+                    type: type,
+                    sourceFeed: feeds[Math.floor(Math.random() * feeds.length)],
+                    threatLevel: threatLevels[Math.floor(Math.random() * threatLevels.length)],
+                    firstSeen: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+                    lastUpdated: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+                    tags: ['malware', 'phishing'],
+                    metadata: {
+                        description: `Mock IOC ${i} for testing purposes`,
+                        confidence: Math.floor(Math.random() * 100)
+                    }
+                });
+            }
+            
+            return mockIOCs;
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const total = iocs.length;
+            const ipCount = iocs.filter(ioc => ioc.type === 'ip').length;
+            const domainCount = iocs.filter(ioc => ioc.type === 'domain').length;
+            const hashCount = iocs.filter(ioc => ioc.type === 'hash').length;
+            
+            document.getElementById('totalIOCs').textContent = total.toLocaleString();
+            document.getElementById('ipCount').textContent = ipCount.toLocaleString();
+            document.getElementById('domainCount').textContent = domainCount.toLocaleString();
+            document.getElementById('hashCount').textContent = hashCount.toLocaleString();
+        }
+        
+        // Render IOCs table
+        function renderIOCsTable() {
+            const tbody = document.getElementById('iocsTableBody');
+            tbody.innerHTML = '';
+            
+            if (filteredIOCs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-400">
+                            <div class="flex flex-col items-center">
+                                <i data-lucide="shield-off" class="w-12 h-12 mb-4 text-gray-600"></i>
+                                <p class="text-lg font-medium">No IOCs found</p>
+                                <p class="text-sm">No indicators match your current filters</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                lucide.createIcons();
+                updatePaginationInfo(0, 0, 0);
+                return;
+            }
+            
+            // Pagination logic
+            let pageIOCs = filteredIOCs;
+            let startIndex = 0;
+            let endIndex = filteredIOCs.length;
+            
+            if (itemsPerPage > 0) {
+                startIndex = (currentPage - 1) * itemsPerPage;
+                endIndex = Math.min(startIndex + itemsPerPage, filteredIOCs.length);
+                pageIOCs = filteredIOCs.slice(startIndex, endIndex);
+            }
+            
+            pageIOCs.forEach(ioc => {
+                const row = document.createElement('tr');
+                row.className = 'table-row hover:bg-gray-750';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i data-lucide="${getIOCIcon(ioc.type)}" class="w-5 h-5 text-green-500"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-white font-mono">${ioc.value}</div>
+                                <div class="text-sm text-gray-400">${ioc.metadata?.description || ''}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getTypeBadgeClass(ioc.type)}">${ioc.type.toUpperCase()}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-300">${ioc.sourceFeed}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getThreatLevelBadgeClass(ioc.threatLevel)}">${ioc.threatLevel.toUpperCase()}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                        ${formatDate(ioc.firstSeen)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                        ${formatDate(ioc.lastUpdated)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button class="text-green-500 hover:text-green-700 mr-3" onclick="copyIOC('${ioc.value}')">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                        <button class="text-red-500 hover:text-red-700" onclick="deleteIOC('${ioc.id}')">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            lucide.createIcons();
+            
+            updatePaginationInfo(startIndex + 1, endIndex, filteredIOCs.length);
+        }
+        
+        // Helper functions
+        function getIOCIcon(type) {
+            const icons = {
+                'ip': 'map-pin',
+                'domain': 'globe',
+                'url': 'link',
+                'hash': 'hash',
+                'email': 'mail'
+            };
+            return icons[type] || 'shield';
+        }
+        
+        function getTypeBadgeClass(type) {
+            const classes = {
+                'ip': 'bg-red-900 text-red-100',
+                'domain': 'bg-blue-900 text-blue-100',
+                'url': 'bg-yellow-900 text-yellow-100',
+                'hash': 'bg-purple-900 text-purple-100',
+                'email': 'bg-green-900 text-green-100'
+            };
+            return classes[type] || 'bg-gray-900 text-gray-100';
+        }
+        
+        function getThreatLevelBadgeClass(level) {
+            const classes = {
+                'high': 'bg-red-900 text-red-100',
+                'medium': 'bg-yellow-900 text-yellow-100',
+                'low': 'bg-green-900 text-green-100'
+            };
+            return classes[level] || 'bg-gray-900 text-gray-100';
+        }
+        
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Unknown';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+        
+        // Apply all filters
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const typeFilter = document.getElementById('typeFilter').value;
+            const threatLevelFilter = document.getElementById('threatLevelFilter').value;
+            const sourceFeedFilter = document.getElementById('sourceFeedFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+            const confidenceFilter = document.getElementById('confidenceFilter').value;
+            
+            filteredIOCs = iocs.filter(ioc => {
+                // Search filter
+                const matchesSearch = !searchTerm || 
+                    ioc.value.toLowerCase().includes(searchTerm) ||
+                    ioc.sourceFeed.toLowerCase().includes(searchTerm) ||
+                    (ioc.metadata?.description && ioc.metadata.description.toLowerCase().includes(searchTerm));
+                
+                // Type filter
+                const matchesType = !typeFilter || ioc.type === typeFilter;
+                
+                // Threat level filter
+                const matchesThreatLevel = !threatLevelFilter || ioc.threatLevel === threatLevelFilter;
+                
+                // Source feed filter
+                const matchesSourceFeed = !sourceFeedFilter || ioc.sourceFeed === sourceFeedFilter;
+                
+                // Date filter
+                const matchesDate = !dateFilter || isInDateRange(ioc.firstSeen, dateFilter);
+                
+                // Confidence filter
+                const matchesConfidence = !confidenceFilter || 
+                    (ioc.metadata?.confidence && ioc.metadata.confidence >= parseInt(confidenceFilter));
+                
+                return matchesSearch && matchesType && matchesThreatLevel && 
+                       matchesSourceFeed && matchesDate && matchesConfidence;
+            });
+            
+            currentPage = 1; // Reset to first page when filtering
+            updateActiveFilters();
+            renderIOCsTable();
+        }
+        
+        // Check if date is in specified range
+        function isInDateRange(dateString, range) {
+            if (!dateString) return false;
+            
+            const date = new Date(dateString);
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch (range) {
+                case 'today':
+                    return date >= today;
+                case 'yesterday':
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    return date >= yesterday && date < today;
+                case 'week':
+                    const weekAgo = new Date(today);
+                    weekAgo.setDate(weekAgo.getDate() - 7);
+                    return date >= weekAgo;
+                case 'month':
+                    const monthAgo = new Date(today);
+                    monthAgo.setDate(monthAgo.getDate() - 30);
+                    return date >= monthAgo;
+                case 'quarter':
+                    const quarterAgo = new Date(today);
+                    quarterAgo.setDate(quarterAgo.getDate() - 90);
+                    return date >= quarterAgo;
+                default:
+                    return true;
+            }
+        }
+        
+        // Update active filters display
+        function updateActiveFilters() {
+            const activeFiltersContainer = document.getElementById('activeFilters');
+            if (!activeFiltersContainer) return;
+            
+            const filters = [];
+            
+            const typeFilter = document.getElementById('typeFilter').value;
+            if (typeFilter) {
+                filters.push({ type: 'IOC Type', value: typeFilter.toUpperCase(), filterId: 'typeFilter' });
+            }
+            
+            const threatLevelFilter = document.getElementById('threatLevelFilter').value;
+            if (threatLevelFilter) {
+                filters.push({ type: 'Threat Level', value: threatLevelFilter.toUpperCase(), filterId: 'threatLevelFilter' });
+            }
+            
+            const sourceFeedFilter = document.getElementById('sourceFeedFilter').value;
+            if (sourceFeedFilter) {
+                filters.push({ type: 'Source Feed', value: sourceFeedFilter, filterId: 'sourceFeedFilter' });
+            }
+            
+            const dateFilter = document.getElementById('dateFilter').value;
+            if (dateFilter) {
+                const dateLabels = {
+                    'today': 'Today',
+                    'yesterday': 'Yesterday',
+                    'week': 'Last 7 Days',
+                    'month': 'Last 30 Days',
+                    'quarter': 'Last 90 Days'
+                };
+                filters.push({ type: 'Date Added', value: dateLabels[dateFilter], filterId: 'dateFilter' });
+            }
+            
+            const confidenceFilter = document.getElementById('confidenceFilter').value;
+            if (confidenceFilter) {
+                filters.push({ type: 'Min Confidence', value: `${confidenceFilter}%+`, filterId: 'confidenceFilter' });
+            }
+            
+            const searchTerm = document.getElementById('searchInput').value;
+            if (searchTerm) {
+                filters.push({ type: 'Search', value: `"${searchTerm}"`, filterId: 'searchInput' });
+            }
+            
+            // Render active filter tags
+            activeFiltersContainer.innerHTML = filters.map(filter => `
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-900 text-green-100">
+                    ${filter.type}: ${filter.value}
+                    <button onclick="removeFilter('${filter.filterId}')" class="ml-2 text-green-300 hover:text-green-100">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                    </button>
+                </span>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+        
+        // Remove specific filter
+        function removeFilter(filterId) {
+            const element = document.getElementById(filterId);
+            if (element) {
+                if (element.tagName === 'INPUT') {
+                    element.value = '';
+                } else if (element.tagName === 'SELECT') {
+                    element.value = '';
+                }
+                applyFilters();
+            }
+        }
+        
+        // Clear all filters
+        function clearAllFilters() {
+            document.getElementById('typeFilter').value = '';
+            document.getElementById('threatLevelFilter').value = '';
+            document.getElementById('sourceFeedFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('confidenceFilter').value = '';
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+        }
+        
+        // Change page size
+        function changePageSize() {
+            const newPageSize = parseInt(document.getElementById('pageSizeSelector').value);
+            itemsPerPage = newPageSize;
+            currentPage = 1; // Reset to first page when changing page size
+            renderIOCsTable();
+        }
+        
+        // Copy IOC to clipboard
+        function copyIOC(value) {
+            navigator.clipboard.writeText(value).then(() => {
+                showNotification('IOC copied to clipboard', 'success');
+            }).catch(() => {
+                showNotification('Failed to copy IOC', 'error');
+            });
+        }
+        
+        // Delete IOC
+        async function deleteIOC(iocId) {
+            if (!confirm('Are you sure you want to delete this IOC?')) return;
+            
+            try {
+                if (window.electronAPI) {
+                    await window.electronAPI.deleteIOC(iocId);
+                    showNotification('IOC deleted successfully', 'success');
+                } else {
+                    iocs = iocs.filter(i => i.id !== iocId);
+                    showNotification('IOC deleted successfully (mock)', 'success');
+                }
+                await loadIOCs();
+            } catch (error) {
+                console.error('Error deleting IOC:', error);
+                showNotification('Error deleting IOC', 'error');
+            }
+        }
+        
+        // Export IOCs
+        function exportIOCs() {
+            const dataStr = JSON.stringify(filteredIOCs, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `iocs-export-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            showNotification('IOCs exported successfully', 'success');
+        }
+        
+        // Refresh IOCs
+        function refreshIOCs() {
+            loadIOCs();
+            showNotification('IOCs refreshed', 'info');
+        }
+        
+        // Update pagination information
+        function updatePaginationInfo(start, end, total) {
+            const paginationInfo = document.getElementById('paginationInfo');
+            const paginationNav = document.getElementById('paginationNav');
+            const mobilePrevBtn = document.getElementById('mobilePrevBtn');
+            const mobileNextBtn = document.getElementById('mobileNextBtn');
+            
+            if (total === 0) {
+                paginationInfo.innerHTML = 'No IOCs found';
+                paginationNav.innerHTML = '';
+                if (mobilePrevBtn) mobilePrevBtn.disabled = true;
+                if (mobileNextBtn) mobileNextBtn.disabled = true;
+                return;
+            }
+            
+            // Update pagination info text
+            if (itemsPerPage === 0) {
+                paginationInfo.innerHTML = `Showing all <span class="font-medium">${total}</span> IOCs`;
+            } else {
+                paginationInfo.innerHTML = `Showing <span class="font-medium">${start}</span> to <span class="font-medium">${end}</span> of <span class="font-medium">${total}</span> IOCs`;
+            }
+            
+            // Generate pagination buttons
+            generatePaginationButtons(total);
+            
+            // Update mobile navigation buttons
+            if (mobilePrevBtn) {
+                mobilePrevBtn.disabled = currentPage === 1;
+                mobilePrevBtn.classList.toggle('opacity-50', currentPage === 1);
+                mobilePrevBtn.classList.toggle('cursor-not-allowed', currentPage === 1);
+            }
+            if (mobileNextBtn) {
+                const totalPages = itemsPerPage > 0 ? Math.ceil(total / itemsPerPage) : 1;
+                mobileNextBtn.disabled = currentPage === totalPages;
+                mobileNextBtn.classList.toggle('opacity-50', currentPage === totalPages);
+                mobileNextBtn.classList.toggle('cursor-not-allowed', currentPage === totalPages);
+            }
+        }
+        
+        // Generate pagination buttons
+        function generatePaginationButtons(totalIOCs) {
+            const paginationNav = document.getElementById('paginationNav');
+            
+            // Don't show pagination if showing all or only one page
+            if (itemsPerPage === 0 || totalIOCs <= itemsPerPage) {
+                paginationNav.innerHTML = '';
+                return;
+            }
+            
+            const totalPages = Math.ceil(totalIOCs / itemsPerPage);
+            let paginationHTML = '';
+            
+            // Previous button
+            const prevDisabled = currentPage === 1;
+            paginationHTML += `
+                <button onclick="changePage(${currentPage - 1})" ${prevDisabled ? 'disabled' : ''} class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700 ${prevDisabled ? 'opacity-50 cursor-not-allowed' : ''}">
+                    <span class="sr-only">Previous</span>
+                    <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                </button>
+            `;
+            
+            // Page numbers (show max 5 pages around current page)
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // Adjust start page if we're near the end
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            // First page and ellipsis
+            if (startPage > 1) {
+                paginationHTML += `
+                    <button onclick="changePage(1)" class="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 relative inline-flex items-center px-4 py-2 border text-sm font-medium">1</button>
+                `;
+                if (startPage > 2) {
+                    paginationHTML += `
+                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400">...</span>
+                    `;
+                }
+            }
+            
+            // Page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `
+                        <button aria-current="page" class="z-10 bg-green-800 border-green-500 text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium">${i}</button>
+                    `;
+                } else {
+                    paginationHTML += `
+                        <button onclick="changePage(${i})" class="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 relative inline-flex items-center px-4 py-2 border text-sm font-medium">${i}</button>
+                    `;
+                }
+            }
+            
+            // Last page and ellipsis
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHTML += `
+                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400">...</span>
+                    `;
+                }
+                paginationHTML += `
+                    <button onclick="changePage(${totalPages})" class="bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700 relative inline-flex items-center px-4 py-2 border text-sm font-medium">${totalPages}</button>
+                `;
+            }
+            
+            // Next button
+            const nextDisabled = currentPage === totalPages;
+            paginationHTML += `
+                <button onclick="changePage(${currentPage + 1})" ${nextDisabled ? 'disabled' : ''} class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700 ${nextDisabled ? 'opacity-50 cursor-not-allowed' : ''}">
+                    <span class="sr-only">Next</span>
+                    <i data-lucide="chevron-right" class="h-5 w-5"></i>
+                </button>
+            `;
+            
+            paginationNav.innerHTML = paginationHTML;
+            lucide.createIcons();
+        }
+        
+        // Change page
+        function changePage(page) {
+            const totalPages = itemsPerPage > 0 ? Math.ceil(filteredIOCs.length / itemsPerPage) : 1;
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderIOCsTable();
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check if we have a valid session key if encryption is enabled
+            if (window.electronAPI && window.electronAPI.encryptionStatus) {
+                const status = await window.electronAPI.encryptionStatus();
+                if (status.enabled && status.hasSalt) {
+                    // Try to load data - if decryption fails, redirect to main page
+                    try {
+                        await loadIOCs();
+                    } catch (error) {
+                        console.error('Decryption failed, redirecting to main page');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                }
+            }
+            
+            loadIOCs();
+            
+            // Make functions globally accessible
+            window.copyIOC = copyIOC;
+            window.deleteIOC = deleteIOC;
+            window.exportIOCs = exportIOCs;
+            window.refreshIOCs = refreshIOCs;
+            window.applyFilters = applyFilters;
+            window.changePage = changePage;
+            window.changePageSize = changePageSize;
+            window.removeFilter = removeFilter;
+            window.clearAllFilters = clearAllFilters;
+        });
+        
+        // Close modal when clicking outside
+        document.getElementById('iocDetailsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+            }
+        });
+
+        // --- Custom IOC Type Dropdown Logic ---
+        function toggleTypeDropdown() {
+            const options = document.getElementById('typeDropdownOptions');
+            options.classList.toggle('hidden');
+        }
+        
+        // Close dropdown if clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('customTypeDropdown');
+            if (!dropdown.contains(event.target)) {
+                document.getElementById('typeDropdownOptions').classList.add('hidden');
+            }
+        });
+        
+        // Handle option selection for IOC Type
+        function setupTypeDropdownListeners() {
+            document.querySelectorAll('#typeDropdownOptions .custom-dropdown-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    document.getElementById('typeFilter').value = value;
+                    document.getElementById('typeDropdownSelected').textContent = this.textContent;
+                    document.getElementById('typeDropdownOptions').classList.add('hidden');
+                    applyFilters();
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', setupTypeDropdownListeners);
+        
+        // Keyboard navigation for IOC Type
+        document.getElementById('typeDropdownButton').addEventListener('keydown', function(e) {
+            const options = Array.from(document.querySelectorAll('.custom-dropdown-option'));
+            let currentIndex = options.findIndex(opt => opt.textContent === document.getElementById('typeDropdownSelected').textContent);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentIndex = (currentIndex + 1) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentIndex = (currentIndex - 1 + options.length) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleTypeDropdown();
+            } else if (e.key === 'Escape') {
+                document.getElementById('typeDropdownOptions').classList.add('hidden');
+            }
+        });
+        // --- End Custom Dropdown Logic ---
+
+        // --- Custom Threat Level Dropdown Logic ---
+        function toggleThreatDropdown() {
+            const options = document.getElementById('threatDropdownOptions');
+            options.classList.toggle('hidden');
+        }
+        
+        // Close dropdown if clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('customThreatDropdown');
+            if (!dropdown.contains(event.target)) {
+                document.getElementById('threatDropdownOptions').classList.add('hidden');
+            }
+        });
+        
+        // Handle option selection for Threat Level
+        function setupThreatDropdownListeners() {
+            document.querySelectorAll('#threatDropdownOptions .custom-dropdown-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    document.getElementById('threatLevelFilter').value = value;
+                    document.getElementById('threatDropdownSelected').textContent = this.textContent;
+                    document.getElementById('threatDropdownOptions').classList.add('hidden');
+                    applyFilters();
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', setupThreatDropdownListeners);
+        
+        // Keyboard navigation for Threat Level
+        document.getElementById('threatDropdownButton').addEventListener('keydown', function(e) {
+            const options = Array.from(document.querySelectorAll('.custom-dropdown-option'));
+            let currentIndex = options.findIndex(opt => opt.textContent === document.getElementById('threatDropdownSelected').textContent);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentIndex = (currentIndex + 1) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentIndex = (currentIndex - 1 + options.length) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleThreatDropdown();
+            } else if (e.key === 'Escape') {
+                document.getElementById('threatDropdownOptions').classList.add('hidden');
+            }
+        });
+        // --- End Custom Dropdown Logic ---
+
+        // --- Custom Source Feed Dropdown Logic ---
+        function toggleFeedDropdown() {
+            const options = document.getElementById('feedDropdownOptions');
+            options.classList.toggle('hidden');
+        }
+        
+        // Close dropdown if clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('customFeedDropdown');
+            if (!dropdown.contains(event.target)) {
+                document.getElementById('feedDropdownOptions').classList.add('hidden');
+            }
+        });
+        
+        // Keyboard navigation for Source Feed
+        document.getElementById('feedDropdownButton').addEventListener('keydown', function(e) {
+            const options = Array.from(document.querySelectorAll('.custom-dropdown-option'));
+            let currentIndex = options.findIndex(opt => opt.textContent === document.getElementById('feedDropdownSelected').textContent);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentIndex = (currentIndex + 1) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentIndex = (currentIndex - 1 + options.length) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleFeedDropdown();
+            } else if (e.key === 'Escape') {
+                document.getElementById('feedDropdownOptions').classList.add('hidden');
+            }
+        });
+        // --- End Custom Dropdown Logic ---
+
+        // --- Custom Date Added Dropdown Logic ---
+        function toggleDateDropdown() {
+            const options = document.getElementById('dateDropdownOptions');
+            options.classList.toggle('hidden');
+        }
+        function setupDateDropdownListeners() {
+            document.querySelectorAll('#dateDropdownOptions .custom-dropdown-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    document.getElementById('dateFilter').value = value;
+                    document.getElementById('dateDropdownSelected').textContent = this.textContent;
+                    document.getElementById('dateDropdownOptions').classList.add('hidden');
+                    applyFilters();
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', setupDateDropdownListeners);
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('customDateDropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                document.getElementById('dateDropdownOptions').classList.add('hidden');
+            }
+        });
+        document.getElementById('dateDropdownButton').addEventListener('keydown', function(e) {
+            const options = Array.from(document.querySelectorAll('#dateDropdownOptions .custom-dropdown-option'));
+            let currentIndex = options.findIndex(opt => opt.textContent === document.getElementById('dateDropdownSelected').textContent);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentIndex = (currentIndex + 1) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentIndex = (currentIndex - 1 + options.length) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleDateDropdown();
+            } else if (e.key === 'Escape') {
+                document.getElementById('dateDropdownOptions').classList.add('hidden');
+            }
+        });
+        // --- Custom Min Confidence Dropdown Logic ---
+        function toggleConfidenceDropdown() {
+            const options = document.getElementById('confidenceDropdownOptions');
+            options.classList.toggle('hidden');
+        }
+        function setupConfidenceDropdownListeners() {
+            document.querySelectorAll('#confidenceDropdownOptions .custom-dropdown-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    document.getElementById('confidenceFilter').value = value;
+                    document.getElementById('confidenceDropdownSelected').textContent = this.textContent;
+                    document.getElementById('confidenceDropdownOptions').classList.add('hidden');
+                    applyFilters();
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', setupConfidenceDropdownListeners);
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('customConfidenceDropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                document.getElementById('confidenceDropdownOptions').classList.add('hidden');
+            }
+        });
+        document.getElementById('confidenceDropdownButton').addEventListener('keydown', function(e) {
+            const options = Array.from(document.querySelectorAll('#confidenceDropdownOptions .custom-dropdown-option'));
+            let currentIndex = options.findIndex(opt => opt.textContent === document.getElementById('confidenceDropdownSelected').textContent);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentIndex = (currentIndex + 1) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentIndex = (currentIndex - 1 + options.length) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleConfidenceDropdown();
+            } else if (e.key === 'Escape') {
+                document.getElementById('confidenceDropdownOptions').classList.add('hidden');
+            }
+        });
+        // --- Custom Page Size Dropdown Logic ---
+        function togglePageSizeDropdown() {
+            const options = document.getElementById('pageSizeDropdownOptions');
+            options.classList.toggle('hidden');
+        }
+        function setupPageSizeDropdownListeners() {
+            document.querySelectorAll('#pageSizeDropdownOptions .custom-dropdown-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    document.getElementById('pageSizeSelector').value = value;
+                    document.getElementById('pageSizeDropdownSelected').textContent = this.textContent;
+                    document.getElementById('pageSizeDropdownOptions').classList.add('hidden');
+                    changePageSize();
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', setupPageSizeDropdownListeners);
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('customPageSizeDropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                document.getElementById('pageSizeDropdownOptions').classList.add('hidden');
+            }
+        });
+        document.getElementById('pageSizeDropdownButton').addEventListener('keydown', function(e) {
+            const options = Array.from(document.querySelectorAll('#pageSizeDropdownOptions .custom-dropdown-option'));
+            let currentIndex = options.findIndex(opt => opt.textContent === document.getElementById('pageSizeDropdownSelected').textContent);
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentIndex = (currentIndex + 1) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentIndex = (currentIndex - 1 + options.length) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                togglePageSizeDropdown();
+            } else if (e.key === 'Escape') {
+                document.getElementById('pageSizeDropdownOptions').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html> 

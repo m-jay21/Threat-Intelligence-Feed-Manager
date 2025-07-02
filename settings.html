@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Threat Intelligence Feed Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom time picker styles */
+        #timePickerDropdown {
+            scrollbar-width: thin;
+            scrollbar-color: #4b5563 #1f2937;
+        }
+        
+        #timePickerDropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #timePickerDropdown::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 3px;
+        }
+        
+        #timePickerDropdown::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 3px;
+        }
+        
+        #timePickerDropdown::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+        
+        .time-option:hover {
+            background-color: #4b5563;
+            color: white;
+        }
+        
+        .time-option.selected {
+            background-color: #10b981;
+            color: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="hidden md:flex md:flex-shrink-0">
+            <div class="flex flex-col w-64 bg-gray-900 border-r border-gray-800">
+                <div class="flex items-center h-16 px-4 border-b border-gray-800">
+                    <div class="flex items-center">
+                        <i data-lucide="shield" class="w-6 h-6 text-green-500"></i>
+                        <span class="ml-2 text-lg font-semibold">Threat Intel</span>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-grow overflow-y-auto">
+                    <nav class="flex-1 px-2 py-4 space-y-1">
+                        <a href="index.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="rss" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Feeds</span>
+                        </a>
+                        <a href="downloads.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="download" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Downloads</span>
+                        </a>
+                        <a href="iocs.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="list" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>IOCs</span>
+                        </a>
+                        <a href="logs.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="file-text" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Logs</span>
+                        </a>
+                        <a href="settings.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item active">
+                            <i data-lucide="settings" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Settings</span>
+                        </a>
+                    </nav>
+                </div>
+                <div class="p-4 border-t border-gray-800">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i data-lucide="circle-user" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-white">Admin User</p>
+                            <p class="text-xs font-medium text-gray-400">Security Analyst</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Top navigation -->
+            <div class="flex items-center justify-between h-16 px-4 border-b border-gray-800 bg-gray-900">
+                <div class="flex items-center md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 text-gray-400 rounded-md hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-lg font-semibold">Settings</h1>
+                </div>
+            </div>
+
+            <!-- Main content area -->
+            <div class="flex-1 overflow-auto p-4 bg-gray-900">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <!-- Security Settings Section -->
+                    <div class="bg-gray-800 rounded-lg shadow overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-700">
+                            <div class="flex items-center">
+                                <i data-lucide="lock" class="w-5 h-5 text-green-500 mr-2"></i>
+                                <h2 class="text-lg font-medium text-white">Security Settings</h2>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-1">Configure encryption and security options</p>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <!-- Encryption Toggle -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-300">Enable Encryption for API Keys</label>
+                                    <p class="text-xs text-gray-400">Encrypt sensitive API keys in the database</p>
+                                </div>
+                                <button type="button" id="encryptionToggle" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800" role="switch" aria-checked="false">
+                                    <span id="encryptionToggleThumb" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                                </button>
+                            </div>
+
+                            <!-- Master Password -->
+                            <div id="masterPasswordSection" class="hidden">
+                                <label for="masterPassword" class="block text-sm font-medium text-gray-300">Master Password</label>
+                                <div class="mt-1 relative">
+                                    <input type="password" id="masterPassword" class="block w-full border border-gray-700 rounded-md shadow-sm py-2 px-3 bg-gray-700 text-white focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm" placeholder="Enter master password for encryption">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                        <button type="button" class="text-gray-400 hover:text-gray-300" id="toggleMasterPassword" onclick="toggleMasterPasswordVisibility()">
+                                            <i data-lucide="eye" class="h-5 w-5" id="masterPasswordIcon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">This password will be used to encrypt/decrypt API keys</p>
+                                <p id="encryptionStatusText" class="text-sm text-gray-400 mt-2">API keys are stored in plain text</p>
+                            </div>
+
+                            <!-- Wipe All Data -->
+                            <div class="pt-4 border-t border-gray-700">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <label class="text-sm font-medium text-red-400">Danger Zone</label>
+                                        <p class="text-xs text-gray-400">Permanently delete all data including feeds, IOCs, and settings</p>
+                                    </div>
+                                    <button type="button" onclick="showWipeDataModal()" class="inline-flex items-center px-3 py-2 border border-red-600 text-sm leading-4 font-medium rounded-md text-red-400 bg-transparent hover:bg-red-900 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                        <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>
+                                        Wipe All Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- General Settings Section -->
+                    <div class="bg-gray-800 rounded-lg shadow overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-700">
+                            <div class="flex items-center">
+                                <i data-lucide="settings" class="w-5 h-5 text-blue-500 mr-2"></i>
+                                <h2 class="text-lg font-medium text-white">General Settings</h2>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-1">Configure application behavior and preferences</p>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <!-- Download Time -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300">Daily Download Time</label>
+                                <div class="relative mt-1">
+                                    <button type="button" id="timePickerBtn" onclick="toggleTimePicker()" class="w-full flex items-center justify-between border border-gray-700 rounded-md shadow-sm py-2 px-3 bg-gray-700 text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm transition-colors">
+                                        <span id="selectedTimeDisplay">04:00</span>
+                                        <i data-lucide="clock" class="w-4 h-4 text-gray-400"></i>
+                                    </button>
+                                    
+                                    <!-- Custom Time Picker Dropdown -->
+                                    <div id="timePickerDropdown" class="hidden absolute z-10 mt-1 w-full bg-gray-700 border border-gray-600 rounded-md shadow-lg">
+                                        <div class="p-3">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <!-- Hours Column -->
+                                                <div>
+                                                    <div class="text-xs font-medium text-gray-400 mb-2">Hour</div>
+                                                    <div class="space-y-1 max-h-32 overflow-y-auto" id="hoursGrid">
+                                                        <!-- Hours will be generated here -->
+                                                    </div>
+                                                </div>
+                                                <!-- AM/PM Column -->
+                                                <div>
+                                                    <div class="text-xs font-medium text-gray-400 mb-2">Period</div>
+                                                    <div class="space-y-1">
+                                                        <button type="button" id="amBtn" onclick="selectPeriod('AM')" class="w-full px-3 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset transition-colors">
+                                                            AM
+                                                        </button>
+                                                        <button type="button" id="pmBtn" onclick="selectPeriod('PM')" class="w-full px-3 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset transition-colors">
+                                                            PM
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">Time when feeds will be automatically downloaded daily (12-hour format)</p>
+                            </div>
+
+                            <!-- Scheduler Status -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300">Scheduler Status</label>
+                                <div class="mt-1 p-3 bg-gray-700 rounded-md border border-gray-600">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-300">
+                                                Status: <span id="schedulerStatus" class="font-medium">Loading...</span>
+                                            </p>
+                                            <p class="text-xs text-gray-400 mt-1">
+                                                Next run: <span id="nextRunTime">Loading...</span>
+                                            </p>
+                                        </div>
+                                        <div class="space-x-2">
+                                            <button type="button" id="pauseSchedulerBtn" onclick="pauseScheduler()" class="inline-flex items-center px-3 py-1 border border-yellow-600 text-xs font-medium rounded text-yellow-400 bg-transparent hover:bg-yellow-900 hover:text-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                                <i data-lucide="pause" class="w-3 h-3 mr-1"></i>
+                                                Pause
+                                            </button>
+                                            <button type="button" id="resumeSchedulerBtn" onclick="resumeScheduler()" class="inline-flex items-center px-3 py-1 border border-green-600 text-xs font-medium rounded text-green-400 bg-transparent hover:bg-green-900 hover:text-green-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                                <i data-lucide="play" class="w-3 h-3 mr-1"></i>
+                                                Resume
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Log Level -->
+                            <div>
+                                <label for="logLevel" class="block text-sm font-medium text-gray-300">Log Level</label>
+                                <select id="logLevel" class="mt-1 block w-full border border-gray-700 rounded-md shadow-sm py-2 px-3 bg-gray-700 text-white focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm">
+                                    <option value="error">Error</option>
+                                    <option value="warn">Warning</option>
+                                    <option value="info">Info</option>
+                                    <option value="debug">Debug</option>
+                                </select>
+                                <p class="text-xs text-gray-400 mt-1">Set the verbosity level for application logs</p>
+                            </div>
+
+                            <!-- Auto Refresh Toggle -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-300">Auto-refresh feeds on app launch</label>
+                                    <p class="text-xs text-gray-400">Automatically download feeds when the application starts</p>
+                                </div>
+                                <button type="button" id="autoRefreshToggle" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-gray-800" role="switch" aria-checked="false">
+                                    <span id="autoRefreshToggleThumb" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                                </button>
+                            </div>
+
+                            <!-- Download Path -->
+                            <div>
+                                <label for="downloadPath" class="block text-sm font-medium text-gray-300">Download Path</label>
+                                <div class="mt-1 flex rounded-md shadow-sm">
+                                    <input type="text" id="downloadPath" class="flex-1 block w-full border border-gray-700 rounded-l-md shadow-sm py-2 px-3 bg-gray-700 text-white focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm" placeholder="Path to store downloaded feeds" readonly>
+                                    <button type="button" onclick="selectDownloadPath()" class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-700 rounded-r-md bg-gray-600 text-sm font-medium text-gray-300 hover:bg-gray-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                                        Browse
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">Directory where feed downloads will be stored</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Management Section -->
+                    <div class="bg-gray-800 rounded-lg shadow overflow-hidden">
+                        <div class="px-4 py-3 border-b border-gray-700">
+                            <div class="flex items-center">
+                                <i data-lucide="database" class="w-5 h-5 text-yellow-500 mr-2"></i>
+                                <h2 class="text-lg font-medium text-white">Data Management</h2>
+                            </div>
+                            <p class="text-sm text-gray-400 mt-1">Manage application data and storage</p>
+                        </div>
+                        <div class="p-4 space-y-4">
+                            <!-- Database Statistics -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="bg-gray-750 rounded-lg p-4">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <i data-lucide="rss" class="w-8 h-8 text-green-500"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-400">Total Feeds</p>
+                                            <p class="text-2xl font-semibold text-white" id="totalFeedsCount">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-750 rounded-lg p-4">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <i data-lucide="list" class="w-8 h-8 text-blue-500"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-400">Total IOCs</p>
+                                            <p class="text-2xl font-semibold text-white" id="totalIOCsCount">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-750 rounded-lg p-4">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <i data-lucide="download" class="w-8 h-8 text-yellow-500"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-gray-400">Download Logs</p>
+                                            <p class="text-2xl font-semibold text-white" id="totalLogsCount">0</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Data Actions -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-gray-750 rounded-lg p-4">
+                                    <h3 class="text-sm font-medium text-gray-300 mb-2">Export Data</h3>
+                                    <p class="text-xs text-gray-400 mb-3">Export your feeds configuration and IOCs</p>
+                                    <div class="space-y-2">
+                                        <button type="button" onclick="exportFeeds()" class="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-600 text-sm leading-4 font-medium rounded-md text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                            <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                                            Export Feeds
+                                        </button>
+                                        <button type="button" onclick="exportIOCs()" class="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-600 text-sm leading-4 font-medium rounded-md text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>
+                                            Export IOCs
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-750 rounded-lg p-4">
+                                    <h3 class="text-sm font-medium text-gray-300 mb-2">Clear Data</h3>
+                                    <p class="text-xs text-gray-400 mb-3">Clear specific data types (reversible)</p>
+                                    <div class="space-y-2">
+                                        <button type="button" onclick="clearIOCs()" class="w-full inline-flex items-center justify-center px-3 py-2 border border-yellow-600 text-sm leading-4 font-medium rounded-md text-yellow-400 bg-transparent hover:bg-yellow-900 hover:text-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                            <i data-lucide="trash" class="w-4 h-4 mr-2"></i>
+                                            Clear IOCs
+                                        </button>
+                                        <button type="button" onclick="clearLogs()" class="w-full inline-flex items-center justify-center px-3 py-2 border border-yellow-600 text-sm leading-4 font-medium rounded-md text-yellow-400 bg-transparent hover:bg-yellow-900 hover:text-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                            <i data-lucide="file-x" class="w-4 h-4 mr-2"></i>
+                                            Clear Logs
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="flex justify-end">
+                        <button type="button" onclick="saveSettings()" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wipe Data Confirmation Modal -->
+    <div class="fixed z-10 inset-0 overflow-y-auto hidden" id="wipeDataModal">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity modal-overlay" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-900 sm:mx-0 sm:h-10 sm:w-10">
+                            <i data-lucide="alert-triangle" class="h-6 w-6 text-red-500"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-white">Wipe All Data</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-400">This action will permanently delete all feeds, IOCs, download logs, and settings. This action cannot be undone.</p>
+                                <div class="mt-4">
+                                    <label for="wipeConfirmation" class="block text-sm font-medium text-gray-300">Type "WIPE" to confirm</label>
+                                    <input type="text" id="wipeConfirmation" class="mt-1 block w-full border border-gray-700 rounded-md shadow-sm py-2 px-3 bg-gray-700 text-white focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="WIPE">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-750 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="confirmWipeBtn" disabled class="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="confirmWipeData()">
+                        Wipe All Data
+                    </button>
+                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-700 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="document.getElementById('wipeDataModal').classList.add('hidden')">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div class="fixed z-50 inset-0 overflow-y-auto hidden" id="changePasswordModal">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity modal-overlay" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-900 sm:mx-0 sm:h-10 sm:w-10">
+                            <i data-lucide="key" class="h-6 w-6 text-blue-400"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-white">Change Master Password</h3>
+                            <div class="mt-2">
+                                <label class="block text-sm font-medium text-gray-300">Current Password</label>
+                                <input type="password" id="oldMasterPassword" class="mt-1 block w-full border border-gray-700 rounded-md shadow-sm py-2 px-3 bg-gray-700 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="Current password">
+                                <label class="block text-sm font-medium text-gray-300 mt-4">New Password</label>
+                                <input type="password" id="newMasterPassword" class="mt-1 block w-full border border-gray-700 rounded-md shadow-sm py-2 px-3 bg-gray-700 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="New password">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-750 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="confirmChangePassword()">
+                        Change Password
+                    </button>
+                    <button type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-700 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" onclick="closeChangePasswordModal()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Global variables
+        let currentSettings = {};
+        
+        // Load settings from database
+        async function loadSettings() {
+            try {
+                if (window.electronAPI) {
+                    currentSettings = await window.electronAPI.getSettings();
+                } else {
+                    console.log('Running in browser mode - using mock settings');
+                    currentSettings = {
+                        downloadTime: '04:00',
+                        logLevel: 'info',
+                        autoRefresh: true,
+                        encryptionEnabled: false,
+                        downloadPath: '/path/to/downloads',
+                        lastDownloadTime: null
+                    };
+                }
+                
+                // Update UI with current settings
+                await updateSettingsUI();
+                updateStatistics();
+                updateSchedulerStatus();
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                showNotification('Error loading settings', 'error');
+                // Use default settings on error
+                currentSettings = {
+                    downloadTime: '04:00',
+                    logLevel: 'info',
+                    autoRefresh: true,
+                    encryptionEnabled: false,
+                    downloadPath: path.join(app.getPath('userData'), 'downloads'),
+                    lastDownloadTime: null
+                };
+                await updateSettingsUI();
+                updateSchedulerStatus();
+            }
+        }
+        
+        // Update UI with current settings
+        async function updateSettingsUI() {
+            // Encryption toggle
+            const encryptionToggle = document.getElementById('encryptionToggle');
+            const encryptionToggleThumb = document.getElementById('encryptionToggleThumb');
+            const masterPasswordSection = document.getElementById('masterPasswordSection');
+            
+            // Check encryption status
+            let encryptionStatus = { enabled: false, hasSalt: false };
+            if (window.electronAPI && window.electronAPI.encryptionStatus) {
+                encryptionStatus = await window.electronAPI.encryptionStatus();
+            }
+            
+            if (currentSettings.encryptionEnabled || encryptionStatus.enabled) {
+                encryptionToggle.setAttribute('aria-checked', 'true');
+                encryptionToggle.classList.add('bg-green-600');
+                encryptionToggle.classList.remove('bg-gray-600');
+                encryptionToggleThumb.classList.add('translate-x-5');
+                encryptionToggleThumb.classList.remove('translate-x-0');
+                masterPasswordSection.classList.remove('hidden');
+                
+                // Update status text
+                const statusText = document.getElementById('encryptionStatusText');
+                if (statusText) {
+                    if (encryptionStatus.hasSalt) {
+                        statusText.textContent = 'Encryption is active and protecting your API keys';
+                        statusText.className = 'text-sm text-green-400';
+                    } else {
+                        statusText.textContent = 'Please set a master password to complete encryption setup';
+                        statusText.className = 'text-sm text-yellow-400';
+                    }
+                }
+            } else {
+                encryptionToggle.setAttribute('aria-checked', 'false');
+                encryptionToggle.classList.remove('bg-green-600');
+                encryptionToggle.classList.add('bg-gray-600');
+                encryptionToggleThumb.classList.remove('translate-x-5');
+                encryptionToggleThumb.classList.add('translate-x-0');
+                masterPasswordSection.classList.add('hidden');
+                
+                // Update status text
+                const statusText = document.getElementById('encryptionStatusText');
+                if (statusText) {
+                    statusText.textContent = 'API keys are stored in plain text';
+                    statusText.className = 'text-sm text-gray-400';
+                }
+            }
+            
+            // Auto refresh toggle
+            const autoRefreshToggle = document.getElementById('autoRefreshToggle');
+            const autoRefreshToggleThumb = document.getElementById('autoRefreshToggleThumb');
+            
+            if (currentSettings.autoRefresh) {
+                autoRefreshToggle.setAttribute('aria-checked', 'true');
+                autoRefreshToggle.classList.add('bg-green-600');
+                autoRefreshToggle.classList.remove('bg-gray-600');
+                autoRefreshToggleThumb.classList.add('translate-x-5');
+                autoRefreshToggleThumb.classList.remove('translate-x-0');
+            } else {
+                autoRefreshToggle.setAttribute('aria-checked', 'false');
+                autoRefreshToggle.classList.remove('bg-green-600');
+                autoRefreshToggle.classList.add('bg-gray-600');
+                autoRefreshToggleThumb.classList.remove('translate-x-5');
+                autoRefreshToggleThumb.classList.add('translate-x-0');
+            }
+            
+            // Other settings
+            const timeDisplay = document.getElementById('selectedTimeDisplay');
+            if (timeDisplay) {
+                timeDisplay.textContent = currentSettings.downloadTime || '04:00';
+            }
+            
+            // Update hidden input if it exists
+            const hiddenInput = document.getElementById('downloadTime');
+            if (hiddenInput) {
+                hiddenInput.value = currentSettings.downloadTime || '04:00';
+            }
+            document.getElementById('logLevel').value = currentSettings.logLevel || 'info';
+            document.getElementById('downloadPath').value = currentSettings.downloadPath || '';
+            
+            // Don't set master password value for security
+            document.getElementById('masterPassword').value = '';
+        }
+        
+        // Update statistics
+        async function updateStatistics() {
+            try {
+                if (window.electronAPI) {
+                    const feedsCount = await window.electronAPI.getFeedsCount();
+                    const iocsCount = await window.electronAPI.getIOCsCount();
+                    const logsCount = await window.electronAPI.getLogsCount();
+                    
+                    document.getElementById('totalFeedsCount').textContent = feedsCount.toLocaleString();
+                    document.getElementById('totalIOCsCount').textContent = iocsCount.toLocaleString();
+                    document.getElementById('totalLogsCount').textContent = logsCount.toLocaleString();
+                } else {
+                    // Mock data
+                    document.getElementById('totalFeedsCount').textContent = '4';
+                    document.getElementById('totalIOCsCount').textContent = '2,150';
+                    document.getElementById('totalLogsCount').textContent = '156';
+                }
+            } catch (error) {
+                console.error('Error updating statistics:', error);
+                // Set default values on error
+                document.getElementById('totalFeedsCount').textContent = '0';
+                document.getElementById('totalIOCsCount').textContent = '0';
+                document.getElementById('totalLogsCount').textContent = '0';
+            }
+        }
+        
+        // Toggle functions
+        function toggleEncryption() {
+            const toggle = document.getElementById('encryptionToggle');
+            const thumb = document.getElementById('encryptionToggleThumb');
+            const masterPasswordSection = document.getElementById('masterPasswordSection');
+            const isEnabled = toggle.getAttribute('aria-checked') === 'true';
+            
+            if (!isEnabled) {
+                // Enabling encryption - show password setup
+                toggle.setAttribute('aria-checked', 'true');
+                toggle.classList.add('bg-green-600');
+                toggle.classList.remove('bg-gray-600');
+                thumb.classList.add('translate-x-5');
+                thumb.classList.remove('translate-x-0');
+                masterPasswordSection.classList.remove('hidden');
+                currentSettings.encryptionEnabled = true;
+                
+                // Focus on password field
+                document.getElementById('masterPassword').focus();
+            } else {
+                // Disabling encryption - confirm with user
+                if (confirm('Are you sure you want to disable encryption? This will decrypt all API keys and store them in plain text.')) {
+                    // Call the API to disable encryption
+                    if (window.electronAPI) {
+                        window.electronAPI.disableEncryption().then(result => {
+                            if (result.success) {
+                                toggle.setAttribute('aria-checked', 'false');
+                                toggle.classList.remove('bg-green-600');
+                                toggle.classList.add('bg-gray-600');
+                                thumb.classList.remove('translate-x-5');
+                                thumb.classList.add('translate-x-0');
+                                masterPasswordSection.classList.add('hidden');
+                                currentSettings.encryptionEnabled = false;
+                                
+                                // Clear password field
+                                document.getElementById('masterPassword').value = '';
+                                
+                                // Update UI
+                                updateSettingsUI();
+                                showNotification('Encryption disabled successfully', 'success');
+                            } else {
+                                showNotification('Error disabling encryption', 'error');
+                            }
+                        }).catch(error => {
+                            console.error('Error disabling encryption:', error);
+                            showNotification('Error disabling encryption', 'error');
+                        });
+                    } else {
+                        // Mock mode
+                        toggle.setAttribute('aria-checked', 'false');
+                        toggle.classList.remove('bg-green-600');
+                        toggle.classList.add('bg-gray-600');
+                        thumb.classList.remove('translate-x-5');
+                        thumb.classList.add('translate-x-0');
+                        masterPasswordSection.classList.add('hidden');
+                        currentSettings.encryptionEnabled = false;
+                        document.getElementById('masterPassword').value = '';
+                        showNotification('Encryption disabled (mock mode)', 'success');
+                    }
+                }
+            }
+        }
+        
+        function toggleAutoRefresh() {
+            const toggle = document.getElementById('autoRefreshToggle');
+            const thumb = document.getElementById('autoRefreshToggleThumb');
+            const isEnabled = toggle.getAttribute('aria-checked') === 'true';
+            
+            if (!isEnabled) {
+                toggle.setAttribute('aria-checked', 'true');
+                toggle.classList.add('bg-green-600');
+                toggle.classList.remove('bg-gray-600');
+                thumb.classList.add('translate-x-5');
+                thumb.classList.remove('translate-x-0');
+                currentSettings.autoRefresh = true;
+            } else {
+                toggle.setAttribute('aria-checked', 'false');
+                toggle.classList.remove('bg-green-600');
+                toggle.classList.add('bg-gray-600');
+                thumb.classList.remove('translate-x-5');
+                thumb.classList.add('translate-x-0');
+                currentSettings.autoRefresh = false;
+            }
+        }
+        
+        function toggleMasterPasswordVisibility() {
+            const passwordInput = document.getElementById('masterPassword');
+            const icon = document.getElementById('masterPasswordIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                passwordInput.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            
+            lucide.createIcons();
+        }
+        
+        // Save settings
+        async function saveSettings() {
+            try {
+                // Collect form data
+                const settings = {
+                    downloadTime: document.getElementById('selectedTimeDisplay').textContent || '04:00',
+                    logLevel: document.getElementById('logLevel').value,
+                    autoRefresh: currentSettings.autoRefresh,
+                    encryptionEnabled: currentSettings.encryptionEnabled,
+                    downloadPath: document.getElementById('downloadPath').value
+                };
+                
+                // Handle encryption setup
+                if (currentSettings.encryptionEnabled) {
+                    const masterPassword = document.getElementById('masterPassword').value;
+                    if (!masterPassword) {
+                        showNotification('Master password is required when encryption is enabled', 'error');
+                        return;
+                    }
+                    
+                    // Check if this is initial setup (no salt exists)
+                    const status = await window.electronAPI.encryptionStatus();
+                    if (!status.hasSalt) {
+                        // Initial setup - generate salt and encrypt existing API keys
+                        if (window.electronAPI) {
+                            await window.electronAPI.setupEncryption(masterPassword);
+                            showNotification('Encryption setup completed successfully', 'success');
+                        }
+                    } else {
+                        // Encryption already set up - just update password if changed
+                        settings.masterPassword = masterPassword;
+                    }
+                }
+                
+                if (window.electronAPI) {
+                    await window.electronAPI.updateSettings(settings);
+                    
+                    // Update download path if changed
+                    if (settings.downloadPath && settings.downloadPath !== currentSettings.downloadPath) {
+                        await window.electronAPI.updateDownloadPath(settings.downloadPath);
+                    }
+                    
+                    // Update download interval if changed
+                                if (settings.downloadTime !== currentSettings.downloadTime) {
+                await window.electronAPI.updateDownloadTime(settings.downloadTime);
+                    }
+                    
+                    showNotification('Settings saved successfully', 'success');
+                } else {
+                    console.log('Settings would be saved:', settings);
+                    showNotification('Settings saved (mock mode)', 'success');
+                }
+                
+                // Update current settings
+                currentSettings = { ...currentSettings, ...settings };
+                updateSchedulerStatus();
+                
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showNotification('Error saving settings', 'error');
+            }
+        }
+        
+        // Select download path
+        async function selectDownloadPath() {
+            try {
+                if (window.electronAPI) {
+                    const path = await window.electronAPI.selectDirectory();
+                    if (path) {
+                        document.getElementById('downloadPath').value = path;
+                    }
+                } else {
+                    console.log('Directory selection not available in browser mode');
+                    showNotification('Directory selection not available in browser mode', 'info');
+                }
+            } catch (error) {
+                console.error('Error selecting directory:', error);
+                showNotification('Error selecting directory', 'error');
+            }
+        }
+        
+        // Export functions
+        async function exportFeeds() {
+            try {
+                if (window.electronAPI) {
+                    await window.electronAPI.exportFeeds();
+                    showNotification('Feeds exported successfully', 'success');
+                } else {
+                    console.log('Export feeds functionality');
+                    showNotification('Export feeds (mock mode)', 'info');
+                }
+            } catch (error) {
+                console.error('Error exporting feeds:', error);
+                showNotification('Error exporting feeds', 'error');
+            }
+        }
+        
+        async function exportIOCs() {
+            try {
+                if (window.electronAPI) {
+                    await window.electronAPI.exportIOCs();
+                    showNotification('IOCs exported successfully', 'success');
+                } else {
+                    console.log('Export IOCs functionality');
+                    showNotification('Export IOCs (mock mode)', 'info');
+                }
+            } catch (error) {
+                console.error('Error exporting IOCs:', error);
+                showNotification('Error exporting IOCs', 'error');
+            }
+        }
+        
+        // Clear functions
+        async function clearIOCs() {
+            if (confirm('Are you sure you want to clear all IOCs? This action cannot be undone.')) {
+                try {
+                    if (window.electronAPI) {
+                        await window.electronAPI.clearIOCs();
+                        showNotification('IOCs cleared successfully', 'success');
+                        updateStatistics();
+                    } else {
+                        console.log('Clear IOCs functionality');
+                        showNotification('IOCs cleared (mock mode)', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error clearing IOCs:', error);
+                    showNotification('Error clearing IOCs', 'error');
+                }
+            }
+        }
+        
+        async function clearLogs() {
+            if (confirm('Are you sure you want to clear all download logs? This action cannot be undone.')) {
+                try {
+                    if (window.electronAPI) {
+                        await window.electronAPI.clearDownloadLogs();
+                        showNotification('Download logs cleared successfully', 'success');
+                        updateStatistics();
+                    } else {
+                        console.log('Clear logs functionality');
+                        showNotification('Download logs cleared (mock mode)', 'success');
+                    }
+                } catch (error) {
+                    console.error('Error clearing logs:', error);
+                    showNotification('Error clearing logs', 'error');
+                }
+            }
+        }
+        
+        // Wipe data functions
+        function showWipeDataModal() {
+            document.getElementById('wipeDataModal').classList.remove('hidden');
+            document.getElementById('wipeConfirmation').value = '';
+            document.getElementById('confirmWipeBtn').disabled = true;
+        }
+        
+        function confirmWipeData() {
+            const confirmation = document.getElementById('wipeConfirmation').value;
+            if (confirmation === 'WIPE') {
+                wipeAllData();
+            } else {
+                showNotification('Please type "WIPE" to confirm', 'error');
+            }
+        }
+        
+        async function wipeAllData() {
+            try {
+                if (window.electronAPI) {
+                    await window.electronAPI.wipeAllData();
+                    showNotification('All data wiped successfully', 'success');
+                    document.getElementById('wipeDataModal').classList.add('hidden');
+                    updateStatistics();
+                } else {
+                    console.log('Wipe all data functionality');
+                    showNotification('All data wiped (mock mode)', 'success');
+                    document.getElementById('wipeDataModal').classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error wiping data:', error);
+                showNotification('Error wiping data', 'error');
+            }
+        }
+        
+        // Helper functions
+        function showNotification(message, type = 'info') {
+            console.log(`${type.toUpperCase()}: ${message}`);
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm transform transition-all duration-300 translate-x-full`;
+            
+            // Set colors based on type
+            switch (type) {
+                case 'success':
+                    notification.classList.add('bg-green-600', 'text-white');
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-600', 'text-white');
+                    break;
+                case 'warning':
+                    notification.classList.add('bg-yellow-600', 'text-white');
+                    break;
+                default:
+                    notification.classList.add('bg-blue-600', 'text-white');
+            }
+            
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : type === 'warning' ? 'alert-triangle' : 'info'}" class="w-5 h-5"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium">${message}</p>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-white hover:text-gray-200">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.add('translate-x-full');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+            
+            // Reinitialize icons
+            lucide.createIcons();
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check if we have a valid session key if encryption is enabled
+            if (window.electronAPI && window.electronAPI.encryptionStatus) {
+                const status = await window.electronAPI.encryptionStatus();
+                if (status.enabled && status.hasSalt) {
+                    // Try to load data - if decryption fails, redirect to main page
+                    try {
+                        await loadSettings();
+                    } catch (error) {
+                        console.error('Decryption failed, redirecting to main page');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                }
+            }
+            
+            loadSettings();
+            
+            // Toggle event listeners
+            document.getElementById('encryptionToggle').addEventListener('click', toggleEncryption);
+            document.getElementById('autoRefreshToggle').addEventListener('click', toggleAutoRefresh);
+            
+            // Wipe confirmation input listener
+            document.getElementById('wipeConfirmation').addEventListener('input', (e) => {
+                const confirmBtn = document.getElementById('confirmWipeBtn');
+                confirmBtn.disabled = e.target.value !== 'WIPE';
+            });
+            
+            // Close modal when clicking outside
+            document.getElementById('wipeDataModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+        });
+
+        // Show password change modal
+        function showChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.remove('hidden');
+            document.getElementById('oldMasterPassword').value = '';
+            document.getElementById('newMasterPassword').value = '';
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('changePasswordModal').classList.add('hidden');
+        }
+
+        // Confirm password change
+        async function confirmChangePassword() {
+            const oldPassword = document.getElementById('oldMasterPassword').value;
+            const newPassword = document.getElementById('newMasterPassword').value;
+            if (!oldPassword || !newPassword) {
+                showNotification('Both fields are required', 'error');
+                return;
+            }
+            // Derive old key and test decryption
+            const status = await window.electronAPI.encryptionStatus();
+            if (!status.enabled || !status.hasSalt) {
+                showNotification('Encryption is not enabled', 'error');
+                return;
+            }
+            const setOldKey = await window.electronAPI.setSessionEncryptionKey(oldPassword);
+            if (!setOldKey.success) {
+                showNotification('Current password is incorrect', 'error');
+                return;
+            }
+            // Fetch all feeds and try to decrypt one
+            const feeds = await window.electronAPI.getFeeds();
+            let testDecryption = true;
+            for (const feed of feeds) {
+                if (feed.apiKey) {
+                    testDecryption = !!feed.apiKey;
+                    break;
+                }
+            }
+            if (!testDecryption) {
+                showNotification('Current password is incorrect', 'error');
+                return;
+            }
+            // Generate new salt and derive new key
+            const newSalt = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('');
+            const newKey = CryptoJS.PBKDF2(newPassword, newSalt, { keySize: 256/32, iterations: 100000 }).toString();
+            // Re-encrypt all API keys
+            for (const feed of feeds) {
+                if (feed.apiKey) {
+                    const encryptedApiKey = CryptoJS.AES.encrypt(feed.apiKey, newKey).toString();
+                    await window.electronAPI.updateFeed({ ...feed, apiKey: encryptedApiKey });
+                }
+            }
+            // Update salt in settings
+            await window.electronAPI.updateSettings({ encryptionSalt: newSalt });
+            // Set new session key
+            await window.electronAPI.setSessionEncryptionKey(newPassword);
+            showNotification('Master password changed successfully', 'success');
+            closeChangePasswordModal();
+        }
+
+        // Custom Time Picker functions
+        let selectedHour = 4;
+        let selectedPeriod = 'AM';
+
+        function generateTimeOptions() {
+            const hoursGrid = document.getElementById('hoursGrid');
+            hoursGrid.innerHTML = '';
+            
+            // Generate hour options from 1 to 12
+            for (let hour = 1; hour <= 12; hour++) {
+                const hourButton = document.createElement('button');
+                hourButton.type = 'button';
+                
+                // Check if this is the currently selected hour
+                const isSelected = hour === selectedHour;
+                hourButton.className = `px-3 py-2 text-sm rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset transition-colors ${
+                    isSelected 
+                        ? 'bg-green-600 text-white' 
+                        : 'text-gray-300 hover:bg-gray-600 hover:text-white'
+                }`;
+                
+                hourButton.textContent = hour;
+                hourButton.onclick = () => selectHour(hour);
+                hoursGrid.appendChild(hourButton);
+            }
+            
+            // Update period buttons
+            updatePeriodButtons();
+        }
+
+        function selectHour(hour) {
+            selectedHour = hour;
+            updateTimeDisplay();
+            generateTimeOptions(); // Regenerate to update selection
+        }
+
+        function selectPeriod(period) {
+            selectedPeriod = period;
+            updateTimeDisplay();
+            updatePeriodButtons();
+        }
+
+        function updatePeriodButtons() {
+            const amBtn = document.getElementById('amBtn');
+            const pmBtn = document.getElementById('pmBtn');
+            
+            // Reset both buttons
+            amBtn.className = 'w-full px-3 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset transition-colors';
+            pmBtn.className = 'w-full px-3 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset transition-colors';
+            
+            // Highlight selected period
+            if (selectedPeriod === 'AM') {
+                amBtn.className = 'w-full px-3 py-2 text-sm bg-green-600 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset transition-colors';
+            } else {
+                pmBtn.className = 'w-full px-3 py-2 text-sm bg-green-600 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-inset transition-colors';
+            }
+        }
+
+        function updateTimeDisplay() {
+            // Convert 12-hour format to 24-hour format for storage
+            let hour24 = selectedHour;
+            if (selectedPeriod === 'PM' && selectedHour !== 12) {
+                hour24 = selectedHour + 12;
+            } else if (selectedPeriod === 'AM' && selectedHour === 12) {
+                hour24 = 0;
+            }
+            
+            const timeString = hour24.toString().padStart(2, '0') + ':00';
+            document.getElementById('selectedTimeDisplay').textContent = timeString;
+            
+            // Update hidden input
+            if (!document.getElementById('downloadTime')) {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.id = 'downloadTime';
+                hiddenInput.name = 'downloadTime';
+                document.querySelector('#timePickerBtn').parentElement.appendChild(hiddenInput);
+            }
+            document.getElementById('downloadTime').value = timeString;
+        }
+
+        function parseTimeTo12Hour(timeString) {
+            const [hours, minutes] = timeString.split(':').map(Number);
+            let hour12 = hours;
+            let period = 'AM';
+            
+            if (hours === 0) {
+                hour12 = 12;
+                period = 'AM';
+            } else if (hours === 12) {
+                hour12 = 12;
+                period = 'PM';
+            } else if (hours > 12) {
+                hour12 = hours - 12;
+                period = 'PM';
+            }
+            
+            return { hour: hour12, period: period };
+        }
+
+        function toggleTimePicker() {
+            const dropdown = document.getElementById('timePickerDropdown');
+            const isHidden = dropdown.classList.contains('hidden');
+            
+            if (isHidden) {
+                // Close any other open dropdowns first
+                document.querySelectorAll('.dropdown-open').forEach(el => {
+                    el.classList.add('hidden');
+                    el.classList.remove('dropdown-open');
+                });
+                
+                // Parse current time to set initial selection
+                const currentTime = document.getElementById('selectedTimeDisplay').textContent;
+                const time12 = parseTimeTo12Hour(currentTime);
+                selectedHour = time12.hour;
+                selectedPeriod = time12.period;
+                
+                // Open this dropdown
+                dropdown.classList.remove('hidden');
+                dropdown.classList.add('dropdown-open');
+                generateTimeOptions();
+            } else {
+                // Close this dropdown
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('dropdown-open');
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const timePicker = document.getElementById('timePickerBtn');
+            const dropdown = document.getElementById('timePickerDropdown');
+            
+            if (!timePicker.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('dropdown-open');
+            }
+        });
+
+        // Scheduler functions
+        async function updateSchedulerStatus() {
+            try {
+                if (window.electronAPI) {
+                    const status = await window.electronAPI.getSchedulerStatus();
+                    const statusElement = document.getElementById('schedulerStatus');
+                    const nextRunElement = document.getElementById('nextRunTime');
+                    const pauseBtn = document.getElementById('pauseSchedulerBtn');
+                    const resumeBtn = document.getElementById('resumeSchedulerBtn');
+                    
+                    // Update status
+                    if (status.isRunning) {
+                        statusElement.textContent = 'Running';
+                        statusElement.className = 'font-medium text-green-400';
+                        pauseBtn.style.display = 'inline-flex';
+                        resumeBtn.style.display = 'none';
+                    } else {
+                        statusElement.textContent = 'Paused';
+                        statusElement.className = 'font-medium text-yellow-400';
+                        pauseBtn.style.display = 'none';
+                        resumeBtn.style.display = 'inline-flex';
+                    }
+                    
+                    // Update next run time
+                    if (status.nextRun) {
+                        const nextRun = new Date(status.nextRun);
+                        nextRunElement.textContent = nextRun.toLocaleString();
+                    } else {
+                        nextRunElement.textContent = 'Not scheduled';
+                    }
+                } else {
+                    // Mock data
+                    document.getElementById('schedulerStatus').textContent = 'Running (Mock)';
+                    document.getElementById('nextRunTime').textContent = 'Tomorrow at 04:00';
+                }
+            } catch (error) {
+                console.error('Error updating scheduler status:', error);
+                document.getElementById('schedulerStatus').textContent = 'Error';
+                document.getElementById('nextRunTime').textContent = 'Unknown';
+            }
+        }
+
+        async function pauseScheduler() {
+            try {
+                if (window.electronAPI) {
+                    await window.electronAPI.pauseDownloadScheduler();
+                    showNotification('Scheduler paused', 'success');
+                    updateSchedulerStatus();
+                } else {
+                    showNotification('Scheduler paused (mock mode)', 'success');
+                }
+            } catch (error) {
+                console.error('Error pausing scheduler:', error);
+                showNotification('Error pausing scheduler', 'error');
+            }
+        }
+
+        async function resumeScheduler() {
+            try {
+                if (window.electronAPI) {
+                    await window.electronAPI.resumeDownloadScheduler();
+                    showNotification('Scheduler resumed', 'success');
+                    updateSchedulerStatus();
+                } else {
+                    showNotification('Scheduler resumed (mock mode)', 'success');
+                }
+            } catch (error) {
+                console.error('Error resuming scheduler:', error);
+                showNotification('Error resuming scheduler', 'error');
+            }
+        }
+    </script>
+</body>
+</html> 

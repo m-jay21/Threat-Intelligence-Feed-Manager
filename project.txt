@@ -1,0 +1,128 @@
+🔧 Extended Summary Output for AI (Descriptive)
+Project Title: Threat Intelligence Feed Manager
+Platform: Desktop application (Electron + React + TypeScript)
+UI Style: Modern, minimalist, dark mode by default
+Primary Purpose: Manage threat intel feeds, automate downloads, and organize Indicators of Compromise (IOCs)
+
+🌐 Global Layout
+The app uses a fixed top navigation bar with the title on the left (Threat Intel Manager) and tabbed navigation on the right.
+
+The top nav includes four core sections:
+
+Feeds
+
+Downloads
+
+IOCs
+
+Settings
+
+Font: Use Inter or Roboto, 14–16px base size
+
+Color Scheme (Dark Mode):
+
+Background: #1A1A1A
+
+Primary Text: #FFFFFF
+
+Secondary Text: #B0B0B0
+
+Accent (buttons/highlights): Blue or green, subtle and professional
+
+🗂️ Feeds Page (Default/Home)
+This is the central hub for configuring threat feed sources.
+
+Main content includes:
+
+A table/list view showing all added feeds with columns:
+
+Feed Name
+
+Source Type (e.g., AlienVault, Abuse.ch)
+
+Data Format (JSON/CSV/Text)
+
+Status Toggle (Enabled/Disabled)
+
+Last Fetched Timestamp
+
+Action Buttons: Edit, Delete
+
+A "Add Feed" button sits at the top-right of this section:
+
+Triggers a modal with a clean form including:
+
+Feed Name (text input)
+
+Feed Source Type (dropdown: AlienVault, Abuse.ch, VirusTotal, Custom)
+
+API Key (password field, obscured input)
+
+Data Format (radio buttons or dropdown)
+
+Enable on creation (checkbox)
+
+Submit and Cancel buttons
+
+Supports modal editing for updating feed settings
+
+⬇️ Downloads Page
+Provides visibility into automated or manual feed downloads.
+
+Contains a chronological log view, ideally a table or list format, showing:
+
+Feed Name
+
+Download Status (Success, Error, Skipped)
+
+Timestamp of last download attempt
+
+Message or error details
+
+Manual action: A Refresh Now button to manually fetch all enabled feeds.
+
+Download logs auto-update when feeds are refreshed, but real-time socket updates are not required — polling or background refresh is acceptable.
+
+🧩 IOCs Page
+This page focuses on browsing and organizing downloaded Indicators of Compromise.
+
+Search bar at the top for querying indicators (by value, type, or tag).
+
+Filter chip section just below the search:
+
+Filter by type: IPs, Domains, URLs, Hashes, CVEs
+
+Optionally add dynamic filters based on tags
+
+Main content area: IOC Table/List
+
+Columns include:
+
+Value (e.g., 192.168.1.1, google.com, hash string)
+
+Type (IP, Domain, etc.)
+
+Source (from which feed)
+
+Tags (display as badges or chips)
+
+Date Added
+
+Tagging system should allow tagging existing IOCs via dropdown or inline edit
+
+⚙️ Settings Page
+Simple and compact, divided into two collapsible sections:
+
+🔐 Security Settings
+Toggle for "Enable Encryption for API Keys" (on by default)
+
+Input for master password or derived key (optional advanced feature)
+
+Button: Wipe All Data (requires confirmation)
+
+⚙️ General Settings
+Input for setting download interval (in minutes or hours)
+
+Log level selector (Verbose, Info, Error)
+
+Toggle: “Auto-refresh feeds on app launch”

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downloads - Threat Intelligence Feed Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="hidden md:flex md:flex-shrink-0">
+            <div class="flex flex-col w-64 bg-gray-900 border-r border-gray-800">
+                <div class="flex items-center h-16 px-4 border-b border-gray-800">
+                    <div class="flex items-center">
+                        <i data-lucide="shield" class="w-6 h-6 text-green-500"></i>
+                        <span class="ml-2 text-lg font-semibold">Threat Intel</span>
+                    </div>
+                </div>
+                <div class="flex flex-col flex-grow overflow-y-auto">
+                    <nav class="flex-1 px-2 py-4 space-y-1">
+                        <a href="index.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="rss" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Feeds</span>
+                        </a>
+                        <a href="downloads.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item active">
+                            <i data-lucide="download" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Downloads</span>
+                        </a>
+                        <a href="iocs.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="list" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>IOCs</span>
+                        </a>
+                        <a href="logs.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="file-text" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Logs</span>
+                        </a>
+                        <a href="settings.html" class="flex items-center px-3 py-2 text-sm font-medium rounded-md sidebar-item">
+                            <i data-lucide="settings" class="flex-shrink-0 w-5 h-5 mr-3 text-gray-400"></i>
+                            <span>Settings</span>
+                        </a>
+                    </nav>
+                </div>
+                <div class="p-4 border-t border-gray-800">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i data-lucide="circle-user" class="w-8 h-8 text-gray-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-white">Admin User</p>
+                            <p class="text-xs font-medium text-gray-400">Security Analyst</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Top navigation -->
+            <div class="flex items-center justify-between h-16 px-4 border-b border-gray-800 bg-gray-900">
+                <div class="flex items-center md:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 text-gray-400 rounded-md hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-lg font-semibold">Downloads</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="manualDownloadBtn" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none">
+                        <i data-lucide="refresh-cw" class="w-4 h-4 mr-1"></i>
+                        Download Now
+                    </button>
+                    <button id="clearLogsBtn" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none">
+                        <i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>
+                        Clear Logs
+                    </button>
+                    <button id="clearIOCsBtn" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none">
+                        <i data-lucide="database" class="w-4 h-4 mr-1"></i>
+                        Clear IOCs
+                    </button>
+                    <button id="refreshLogsBtn" class="p-1 text-gray-400 rounded-full hover:text-white hover:bg-gray-700 focus:outline-none" title="Refresh Logs & Statistics">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main content area -->
+            <div class="flex-1 overflow-auto p-4 bg-gray-900">
+                <!-- Download Status -->
+                <div class="mb-6">
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-medium text-white">Download Status</h2>
+                                <p class="text-sm text-gray-400">Last download: <span id="lastDownloadTime">Never</span></p>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-500" id="totalFeeds">0</div>
+                                    <div class="text-xs text-gray-400">Total Feeds</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-500" id="enabledFeeds">0</div>
+                                    <div class="text-xs text-gray-400">Enabled</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-yellow-500" id="totalIOCs">0</div>
+                                    <div class="text-xs text-gray-400">Total IOCs</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Download Logs -->
+                <div class="bg-gray-800 rounded-lg shadow overflow-hidden">
+                    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-700">
+                        <div>
+                            <h2 class="text-lg font-medium">Download Logs</h2>
+                            <p class="text-sm text-gray-400">Recent download activity and status</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="search" class="text-gray-400"></i>
+                            </div>
+                            <input type="text" id="logSearch" class="block w-full pl-10 pr-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm" placeholder="Search logs...">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-700">
+                            <thead class="bg-gray-750">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Feed</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Message</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Timestamp</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-gray-800 divide-y divide-gray-700" id="downloadLogsTableBody">
+                                <!-- Download logs will be loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="px-4 py-3 flex items-center justify-between border-t border-gray-700">
+                        <div>
+                            <p class="text-sm text-gray-400" id="logsPaginationInfo">
+                                <!-- Pagination info will be updated dynamically -->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Progress Modal -->
+    <div class="fixed z-10 inset-0 overflow-y-auto hidden" id="downloadProgressModal">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity modal-overlay" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-900 sm:mx-0 sm:h-10 sm:w-10">
+                            <i data-lucide="download" class="h-6 w-6 text-blue-500"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-medium text-white" id="downloadModalTitle">Downloading Feeds</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-400" id="downloadModalMessage">Please wait while we download from all enabled feeds...</p>
+                            </div>
+                            <div class="mt-4">
+                                <div class="w-full bg-gray-700 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" id="downloadProgressBar" style="width: 0%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2" id="downloadProgressText">0% complete</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Details Modal -->
+    <div class="fixed z-10 inset-0 overflow-y-auto hidden" id="logDetailsModal">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity modal-overlay" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-900 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-900 sm:mx-0 sm:h-10 sm:w-10">
+                            <i data-lucide="file-text" class="h-6 w-6 text-blue-500"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-white" id="logModalTitle">Download Log Details</h3>
+                            <div class="mt-2">
+                                <div id="logDetailsContent" class="text-sm text-gray-300">
+                                    <!-- Log details will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-750 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" onclick="closeLogDetailsModal()" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Global variables
+        let downloadLogs = [];
+        let isDownloading = false;
+        
+        // Load download logs
+        async function loadDownloadLogs() {
+            try {
+                if (window.electronAPI) {
+                    downloadLogs = await window.electronAPI.getDownloadLogs();
+                } else {
+                    // Mock data for browser testing
+                    downloadLogs = [
+                        {
+                            id: '1',
+                            feedName: 'AlienVault OTX',
+                            status: 'success',
+                            message: 'Downloaded 1250 IOCs successfully',
+                            timestamp: new Date().toISOString()
+                        },
+                        {
+                            id: '2',
+                            feedName: 'Abuse.ch SSL',
+                            status: 'error',
+                            message: 'Connection timeout',
+                            timestamp: new Date(Date.now() - 3600000).toISOString()
+                        }
+                    ];
+                }
+                renderDownloadLogs();
+                await updateDownloadStats();
+            } catch (error) {
+                console.error('Error loading download logs:', error);
+                showNotification('Error loading download logs', 'error');
+            }
+        }
+        
+        // Render download logs table
+        function renderDownloadLogs() {
+            const tbody = document.getElementById('downloadLogsTableBody');
+            tbody.innerHTML = '';
+            
+            if (downloadLogs.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-400">
+                            <div class="flex flex-col items-center">
+                                <i data-lucide="file-text" class="w-12 h-12 mb-4 text-gray-600"></i>
+                                <p class="text-lg font-medium">No download logs</p>
+                                <p class="text-sm">Download logs will appear here after feeds are processed</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                downloadLogs.forEach(log => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">${log.feedName}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${log.status}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${log.message}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${log.timestamp}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
+                            <button onclick="viewLogDetails('${log.id}')" class="text-indigo-400 hover:text-indigo-300 font-medium">View</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+        
+        // Update download statistics
+        async function updateDownloadStats() {
+            const totalFeeds = document.getElementById('totalFeeds');
+            const enabledFeeds = document.getElementById('enabledFeeds');
+            const totalIOCs = document.getElementById('totalIOCs');
+            const lastDownloadTime = document.getElementById('lastDownloadTime');
+            
+            totalFeeds.textContent = downloadLogs.length;
+            enabledFeeds.textContent = downloadLogs.filter(log => log.status === 'success').length;
+            
+            // Get actual IOC count from database
+            let iocCount = 0;
+            if (window.electronAPI && window.electronAPI.getIOCsCount) {
+                try {
+                    iocCount = await window.electronAPI.getIOCsCount();
+                } catch (error) {
+                    console.error('Error getting IOC count:', error);
+                    iocCount = 0;
+                }
+            }
+            totalIOCs.textContent = iocCount;
+            
+            lastDownloadTime.textContent = downloadLogs.length > 0 ? new Date(downloadLogs[downloadLogs.length - 1].timestamp).toLocaleString() : 'Never';
+        }
+        
+        // Manual download functionality
+        async function startManualDownload() {
+            if (isDownloading) {
+                showNotification('Download already in progress', 'warning');
+                return;
+            }
+            
+            isDownloading = true;
+            showDownloadProgressModal();
+            
+            try {
+                if (window.electronAPI) {
+                    await window.electronAPI.manualDownload();
+                    showNotification('Manual download completed', 'success');
+                } else {
+                    // Mock download for browser testing
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    showNotification('Mock download completed', 'success');
+                }
+            } catch (error) {
+                console.error('Manual download error:', error);
+                showNotification('Manual download failed', 'error');
+            } finally {
+                isDownloading = false;
+                hideDownloadProgressModal();
+                loadDownloadLogs(); // Refresh logs
+            }
+        }
+        
+        // Download progress modal
+        function showDownloadProgressModal() {
+            document.getElementById('downloadProgressModal').classList.remove('hidden');
+            updateDownloadProgress(0, 'Starting download...');
+        }
+        
+        function hideDownloadProgressModal() {
+            document.getElementById('downloadProgressModal').classList.add('hidden');
+        }
+        
+        function updateDownloadProgress(percent, message) {
+            document.getElementById('downloadProgressBar').style.width = percent + '%';
+            document.getElementById('downloadProgressText').textContent = percent + '% complete';
+            document.getElementById('downloadModalMessage').textContent = message;
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg transition-all duration-300 transform translate-x-full ${
+                type === 'success' ? 'bg-green-600' :
+                type === 'error' ? 'bg-red-600' :
+                type === 'warning' ? 'bg-yellow-600' : 'bg-blue-600'
+            } text-white`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 5000);
+        }
+        
+        // View log details functionality
+        async function viewLogDetails(logId) {
+            try {
+                if (window.electronAPI) {
+                    const logDetails = await window.electronAPI.getDownloadLogDetails(logId);
+                    showLogDetailsModal(logDetails);
+                } else {
+                    // Mock data for browser testing
+                    const mockLogDetails = {
+                        id: logId,
+                        feedName: 'Test Feed',
+                        status: 'success',
+                        message: 'Downloaded 1250 IOCs successfully',
+                        timestamp: new Date().toISOString(),
+                        endpoint: 'https://example.com/feed.json',
+                        dataFormat: 'JSON',
+                        sourceType: 'API',
+                        metadata: {
+                            iocsDownloaded: 1250,
+                            fileSize: '2.5MB',
+                            downloadTime: '1.2s'
+                        }
+                    };
+                    showLogDetailsModal(mockLogDetails);
+                }
+            } catch (error) {
+                console.error('Error loading log details:', error);
+                showNotification('Error loading log details', 'error');
+            }
+        }
+
+        function showLogDetailsModal(logDetails) {
+            const modal = document.getElementById('logDetailsModal');
+            const content = document.getElementById('logDetailsContent');
+            
+            const statusColor = logDetails.status === 'success' ? 'text-green-400' : 
+                               logDetails.status === 'error' ? 'text-red-400' : 'text-yellow-400';
+            
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400">Feed Name</label>
+                            <p class="text-white font-medium">${logDetails.feedName || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400">Status</label>
+                            <p class="${statusColor} font-medium">${logDetails.status}</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400">Timestamp</label>
+                            <p class="text-white">${new Date(logDetails.timestamp).toLocaleString()}</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400">Source Type</label>
+                            <p class="text-white">${logDetails.sourceType || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400">Data Format</label>
+                            <p class="text-white">${logDetails.dataFormat || 'N/A'}</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400">Endpoint</label>
+                            <p class="text-white break-all">${logDetails.endpoint || 'N/A'}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400">Message</label>
+                        <p class="text-white">${logDetails.message}</p>
+                    </div>
+                    ${logDetails.metadata && Object.keys(logDetails.metadata).length > 0 ? `
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400">Additional Details</label>
+                            <div class="bg-gray-700 rounded p-3 mt-1">
+                                <pre class="text-xs text-gray-300 whitespace-pre-wrap">${JSON.stringify(logDetails.metadata, null, 2)}</pre>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeLogDetailsModal() {
+            document.getElementById('logDetailsModal').classList.add('hidden');
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Close modal when clicking outside
+            document.getElementById('logDetailsModal').addEventListener('click', (e) => {
+                if (e.target.id === 'logDetailsModal') {
+                    closeLogDetailsModal();
+                }
+            });
+            // Check if we have a valid session key if encryption is enabled
+            if (window.electronAPI && window.electronAPI.encryptionStatus) {
+                const status = await window.electronAPI.encryptionStatus();
+                if (status.enabled && status.hasSalt) {
+                    // Try to load data - if decryption fails, redirect to main page
+                    try {
+                        await loadDownloadLogs();
+                    } catch (error) {
+                        console.error('Decryption failed, redirecting to main page');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                }
+            }
+            
+            loadDownloadLogs();
+            
+            // Manual download button
+            document.getElementById('manualDownloadBtn').addEventListener('click', startManualDownload);
+            
+            // Clear logs button
+            document.getElementById('clearLogsBtn').addEventListener('click', async () => {
+                if (confirm('Are you sure you want to clear all download logs?')) {
+                    try {
+                        if (window.electronAPI) {
+                            await window.electronAPI.clearDownloadLogs();
+                        }
+                        loadDownloadLogs();
+                        showNotification('Download logs cleared', 'success');
+                    } catch (error) {
+                        console.error('Error clearing logs:', error);
+                        showNotification('Error clearing logs', 'error');
+                    }
+                }
+            });
+            
+            // Clear IOCs button
+            document.getElementById('clearIOCsBtn').addEventListener('click', async () => {
+                if (confirm('Are you sure you want to clear all IOCs? This action cannot be undone.')) {
+                    try {
+                        if (window.electronAPI) {
+                            await window.electronAPI.clearIOCs();
+                        }
+                        loadDownloadLogs();
+                        showNotification('All IOCs cleared', 'success');
+                    } catch (error) {
+                        console.error('Error clearing IOCs:', error);
+                        showNotification('Error clearing IOCs', 'error');
+                    }
+                }
+            });
+            
+            // Refresh logs button
+            document.getElementById('refreshLogsBtn').addEventListener('click', () => {
+                loadDownloadLogs();
+                showNotification('Logs refreshed', 'info');
+            });
+            
+            // Search functionality
+            document.getElementById('logSearch').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#downloadLogsTableBody tr');
+                
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
