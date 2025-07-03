@@ -345,6 +345,35 @@ The Settings page allows you to customize how the application works, manage secu
 - **Medium**: Potential threat that should be monitored
 - **Low**: Suspicious activity that might be worth investigating
 
+### How Threat Level is Calculated
+
+The "Threat Level" (High, Medium, Low) helps you quickly understand how dangerous a threat might be. The application calculates this automatically for each threat using a combination of simple rules:
+
+- **Source Reputation:** If the threat comes from a highly trusted source (like a well-known security feed), it is considered more serious.
+- **Confidence Score:** Each threat has a confidence score (0–100) that shows how sure we are that it's real. Higher confidence means a higher threat level.
+- **Recency:** Newer threats are considered more dangerous, because attackers often use new tricks to avoid detection.
+- **Type of Threat:** Some types of threats (like malware or phishing) are more dangerous by nature, so they may be rated higher.
+
+**In simple terms:**  
+- If a threat is new, comes from a trusted source, and has a high confidence score, it will be marked as **High**.
+- If it's older, or the confidence is not as strong, it may be **Medium**.
+- If it's just a little suspicious or comes from a less reliable source, it will be **Low**.
+
+**You don't need to do anything—this is all automatic!** The goal is to help you focus on the most important threats first.
+
+#### Where Does the Confidence Score Come From?
+
+The **confidence score** is a number (from 0 to 100) that shows how certain the system or the original data source is that a particular threat is real and not a false alarm.
+
+- **From the Feed:** Most threat intelligence feeds (like AlienVault OTX, Abuse.ch, etc.) include a confidence score for each threat. This score is provided by experts or automated systems running those feeds, based on their own analysis and criteria.
+    - For example, a feed might say: "We are 95% sure this IP address is malicious," so the confidence score is 95.
+- **If Not Provided:** If a feed does **not** provide a confidence score, the application assigns a sensible default (for example, 50 or 60), or estimates a score based on other available information (such as the reputation of the source, how recent the threat is, or the type of threat).
+- **Manual or Custom Feeds:** If you add a custom feed or enter data manually, and there's no confidence score, the app will use its default or estimation method.
+
+**In summary:**
+- Most of the time, the confidence score comes directly from the threat feed itself.
+- If not, the app uses a sensible default or makes an educated guess.
+
 **Confidence Scores:**
 - **90-100**: Very reliable threat information
 - **70-89**: Reliable information from trusted sources

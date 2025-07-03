@@ -162,12 +162,12 @@
                                     </button>
                                     <div id="typeDropdownOptions" class="absolute z-10 mt-1 w-full bg-gray-800 border border-gray-700 rounded-md shadow-lg hidden">
                                         <div class="py-1">
-                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="">All Types</div>
-                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="ip">IP Addresses</div>
-                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="domain">Domains</div>
-                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="url">URLs</div>
-                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="hash">Hashes</div>
-                                            <div class="custom-type-option border-2 border-transparent px-3 py-2 cursor-pointer hover:bg-gray-800 focus:bg-gray-800 rounded-md text-sm" data-value="email">Emails</div>
+                                            <div class="custom-dropdown-option" data-value="">All Types</div>
+                                            <div class="custom-dropdown-option" data-value="ip">IP Addresses</div>
+                                            <div class="custom-dropdown-option" data-value="domain">Domains</div>
+                                            <div class="custom-dropdown-option" data-value="url">URLs</div>
+                                            <div class="custom-dropdown-option" data-value="hash">Hashes</div>
+                                            <div class="custom-dropdown-option" data-value="email">Emails</div>
                                         </div>
                                     </div>
                                     <input type="hidden" id="typeFilter" value="">
@@ -481,7 +481,7 @@
                     tags: ['malware', 'phishing'],
                     metadata: {
                         description: `Mock IOC ${i} for testing purposes`,
-                        confidence: Math.floor(Math.random() * 100)
+                        confidence: Math.floor(Math.random() * 40) + 60 // Generate confidence between 60-100 for better testing
                     }
                 });
             }
@@ -638,6 +638,11 @@
                 // Type filter
                 const matchesType = !typeFilter || ioc.type === typeFilter;
                 
+                // Debug logging for type filter
+                if (typeFilter) {
+                    console.log(`IOC ${ioc.value}: type ${ioc.type} === ${typeFilter}? ${ioc.type === typeFilter}`);
+                }
+                
                 // Threat level filter
                 const matchesThreatLevel = !threatLevelFilter || ioc.threatLevel === threatLevelFilter;
                 
@@ -650,6 +655,11 @@
                 // Confidence filter
                 const matchesConfidence = !confidenceFilter || 
                     (ioc.metadata?.confidence && ioc.metadata.confidence >= parseInt(confidenceFilter));
+                
+                // Debug logging for confidence filter
+                if (confidenceFilter && ioc.metadata?.confidence) {
+                    console.log(`IOC ${ioc.value}: confidence ${ioc.metadata.confidence} >= ${confidenceFilter}? ${ioc.metadata.confidence >= parseInt(confidenceFilter)}`);
+                }
                 
                 return matchesSearch && matchesType && matchesThreatLevel && 
                        matchesSourceFeed && matchesDate && matchesConfidence;
@@ -981,6 +991,9 @@
             
             loadIOCs();
             
+            // Setup dropdown listeners
+            setupTypeDropdownListeners();
+            
             // Make functions globally accessible
             window.copyIOC = copyIOC;
             window.deleteIOC = deleteIOC;
@@ -1026,7 +1039,6 @@
                 });
             });
         }
-        document.addEventListener('DOMContentLoaded', setupTypeDropdownListeners);
         
         // Keyboard navigation for IOC Type
         document.getElementById('typeDropdownButton').addEventListener('keydown', function(e) {

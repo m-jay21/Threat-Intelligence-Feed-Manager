@@ -1,6 +1,6 @@
 {
   "name": "threat-intel-manager",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Threat Intelligence Feed Manager - Desktop Application",
   "main": "main.js",
   "scripts": {
