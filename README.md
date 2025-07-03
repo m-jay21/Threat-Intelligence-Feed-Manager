@@ -432,23 +432,6 @@ The Settings page allows you to customize how the application works, manage secu
 - **Custom Feeds**: Add any threat feed with a public URL
 - **Data Formats**: Support for JSON, CSV, XML, and text formats
 
-## Support and Updates
-
-### Keeping Updated
-- The application checks for updates automatically
-- Download the latest version from the official website
-- Updates include new features, security patches, and bug fixes
-
-### Community Support
-- Check the documentation for common questions
-- Use the built-in diagnostic tools for troubleshooting
-- Export logs for technical support requests
-
-### Feature Requests
-- The application is actively developed
-- New features are added based on user feedback
-- Security improvements are prioritized
-
 ---
 
 **Note**: This application is designed for security professionals and organizations that need to manage threat intelligence data. Always follow your organization's security policies and procedures when using threat intelligence tools.
