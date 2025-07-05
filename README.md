@@ -474,22 +474,22 @@ This project is licensed under the **GNU General Public License v3 (GPL v3)**.
 ### What this means:
 
 **You are free to:**
-- ✅ Use this software for any purpose (including commercial use)
-- ✅ Share and distribute this software
-- ✅ Create forks and modifications
-- ✅ Build upon and improve the code
-- ✅ Recommend it to clients and companies
+-  Use this software for any purpose (including commercial use)
+-  Share and distribute this software
+-  Create forks and modifications
+-  Build upon and improve the code
+-  Recommend it to clients and companies
 
 **You must:**
-- 📝 Keep the original copyright notice
-- 🔗 Include the GPL v3 license terms
-- 📝 Make source code available if you distribute modified versions
-- 📝 License any derivative works under GPL v3 as well
+-  Keep the original copyright notice
+-  Include the GPL v3 license terms
+-  Make source code available if you distribute modified versions
+-  License any derivative works under GPL v3 as well
 
 **Key Protection:**
-- 🛡️ **Copyleft Protection**: If someone modifies and distributes your code, they MUST also make their source code open source under GPL v3
-- 🛡️ **No Proprietary Derivatives**: They cannot sell a closed-source version of your software
-- 🛡️ **Source Code Access**: Anyone who receives your software has the right to access and modify the source code
+-  **Copyleft Protection**: If someone modifies and distributes your code, they MUST also make their source code open source under GPL v3
+-  **No Proprietary Derivatives**: They cannot sell a closed-source version of your software
+-  **Source Code Access**: Anyone who receives your software has the right to access and modify the source code
 
 This license prevents others from taking your code, changing the header, and selling it as their own proprietary product. Any derivative work must remain open source.
 
