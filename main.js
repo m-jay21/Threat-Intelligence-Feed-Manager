@@ -1119,7 +1119,7 @@ async function downloadFeed(feed) {
     
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const feedFolder = path.join(downloadPath, feed.name.replace(/[^a-zA-Z0-9]/g, '_'));
-    const filePath = path.join(feedFolder, `${today}.json`);
+    const filePath = path.join(feedFolder, `${today}.txt`);
     
     console.log('Feed folder:', feedFolder);
     console.log('File path:', filePath);
@@ -1217,11 +1217,14 @@ async function downloadFeed(feed) {
               });
             }
             
-            // Save raw data to file
-            fs.writeFileSync(filePath, data);
-            
-            // Parse and extract IOCs
+            // Parse and extract IOCs first
             const iocs = await parseIOCs(data, feed.dataFormat, feed.id);
+            
+            // Create clean text content with just IOC values
+            const cleanTextContent = iocs.map(ioc => ioc.value).join('\n');
+            
+            // Save clean text data to file (instead of raw JSON)
+            fs.writeFileSync(filePath, cleanTextContent);
             
             // Store IOCs in database
             await storeIOCs(iocs);
