@@ -8,6 +8,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Enhanced spinning animation for download progress */
+        .download-spinner {
+            animation: spin 1.5s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Add a subtle pulse effect to the text */
+        .pulse-text {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+    </style>
 </head>
 <body class="min-h-screen">
     <div class="flex h-screen overflow-hidden">
@@ -177,11 +198,13 @@
                             <div class="mt-2">
                                 <p class="text-sm text-gray-400" id="downloadModalMessage">Please wait while we download from all enabled feeds...</p>
                             </div>
-                            <div class="mt-4">
-                                <div class="w-full bg-gray-700 rounded-full h-2">
-                                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" id="downloadProgressBar" style="width: 0%"></div>
+                            <div class="mt-4 flex flex-col items-center">
+                                <!-- Spinning Circle Animation -->
+                                <div class="relative w-16 h-16">
+                                    <div class="absolute inset-0 rounded-full border-4 border-gray-600"></div>
+                                    <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-blue-500 border-r-blue-500 download-spinner"></div>
                                 </div>
-                                <p class="text-xs text-gray-400 mt-2" id="downloadProgressText">0% complete</p>
+                                <p class="text-xs text-gray-400 mt-3 pulse-text" id="downloadProgressText">Processing feeds...</p>
                             </div>
                         </div>
                     </div>
@@ -353,17 +376,32 @@
         // Download progress modal
         function showDownloadProgressModal() {
             document.getElementById('downloadProgressModal').classList.remove('hidden');
-            updateDownloadProgress(0, 'Starting download...');
+            document.getElementById('downloadModalMessage').textContent = 'Please wait while we download from all enabled feeds...';
+            document.getElementById('downloadProgressText').textContent = 'Initializing download...';
+            
+            // Cycle through different status messages for better user experience
+            const messages = [
+                'Initializing download...',
+                'Connecting to feeds...',
+                'Processing threat data...',
+                'Extracting indicators...',
+                'Saving to database...'
+            ];
+            
+            let messageIndex = 0;
+            const messageInterval = setInterval(() => {
+                messageIndex = (messageIndex + 1) % messages.length;
+                const textElement = document.getElementById('downloadProgressText');
+                if (textElement && !document.getElementById('downloadProgressModal').classList.contains('hidden')) {
+                    textElement.textContent = messages[messageIndex];
+                } else {
+                    clearInterval(messageInterval);
+                }
+            }, 2000);
         }
         
         function hideDownloadProgressModal() {
             document.getElementById('downloadProgressModal').classList.add('hidden');
-        }
-        
-        function updateDownloadProgress(percent, message) {
-            document.getElementById('downloadProgressBar').style.width = percent + '%';
-            document.getElementById('downloadProgressText').textContent = percent + '% complete';
-            document.getElementById('downloadModalMessage').textContent = message;
         }
         
         // Notification system
