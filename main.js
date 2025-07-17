@@ -1117,17 +1117,11 @@ async function downloadFeed(feed) {
       logInfo('download', 'Created download directory', { path: downloadPath });
     }
     
-    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const feedFolder = path.join(downloadPath, feed.name.replace(/[^a-zA-Z0-9]/g, '_'));
-    const filePath = path.join(feedFolder, `${today}.txt`);
+    // Clean feed name for filename
+    const cleanFeedName = feed.name.replace(/[^a-zA-Z0-9]/g, '_');
     
-    console.log('Feed folder:', feedFolder);
-    console.log('File path:', filePath);
-    
-    // Create feed folder if it doesn't exist
-    if (!fs.existsSync(feedFolder)) {
-      fs.mkdirSync(feedFolder, { recursive: true });
-    }
+    console.log('Download path:', downloadPath);
+    console.log('Clean feed name:', cleanFeedName);
     
     // Function to make HTTP request with redirect support
     function makeRequest(urlString, maxRedirects = 5) {
@@ -1220,11 +1214,24 @@ async function downloadFeed(feed) {
             // Parse and extract IOCs first
             const iocs = await parseIOCs(data, feed.dataFormat, feed.id);
             
-            // Create clean text content with just IOC values
-            const cleanTextContent = iocs.map(ioc => ioc.value).join('\n');
+            // Group IOCs by type
+            const iocsByType = {};
+            iocs.forEach(ioc => {
+              if (!iocsByType[ioc.type]) {
+                iocsByType[ioc.type] = [];
+              }
+              iocsByType[ioc.type].push(ioc.value);
+            });
             
-            // Save clean text data to file (instead of raw JSON)
-            fs.writeFileSync(filePath, cleanTextContent);
+            // Save separate files for each IOC type
+            for (const [type, values] of Object.entries(iocsByType)) {
+              const filename = `${cleanFeedName}-${type}.txt`;
+              const filePath = path.join(downloadPath, filename);
+              const content = values.join('\n');
+              
+              fs.writeFileSync(filePath, content);
+              console.log(`Saved ${values.length} ${type} IOCs to ${filename}`);
+            }
             
             // Store IOCs in database
             await storeIOCs(iocs);
@@ -1232,7 +1239,12 @@ async function downloadFeed(feed) {
             // Update feed last fetched time
             await updateFeedLastFetched(feed.id);
             
-            logInfo('download', `Successfully downloaded feed: ${feed.name}`, { feedId: feed.id, iocCount: iocs.length });
+            logInfo('download', `Successfully downloaded feed: ${feed.name}`, { 
+              feedId: feed.id, 
+              iocCount: iocs.length,
+              fileTypes: Object.keys(iocsByType),
+              filesCreated: Object.keys(iocsByType).map(type => `${cleanFeedName}-${type}.txt`)
+            });
             resolve();
             
           } catch (error) {
